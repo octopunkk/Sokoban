@@ -39,7 +39,6 @@ def initGrid(level):
   for goal in goals:
     grid[goal[0]][goal[1]] = "*"
   grid[player[0]][player[1]] = "x"
-  print(grid)
   return grid
 
 def getPlayerCoordinates(grid):
@@ -53,7 +52,12 @@ def getPlayerCoordinates(grid):
         return [r, c]
 
 def pathIsClear(grid, destination):
-  if grid[destination[0]][destination[1]]==0:
+  if grid[destination[0]][destination[1]]==0 or grid[destination[0]][destination[1]]=='*':
+    return True
+  return False
+
+def boxIsHere(grid, destination):
+  if grid[destination[0]][destination[1]]=='@':
     return True
   return False
 
@@ -62,17 +66,36 @@ def updateGrid(grid, movement):
   playerCoord = getPlayerCoordinates(grid)
   if movement == 'UP':
     destination = [playerCoord[0]-1, playerCoord[1]]
-  if movement == 'DOWN':
+  elif movement == 'DOWN':
     destination = [playerCoord[0]+1, playerCoord[1]]
-  if movement == 'LEFT':
+  elif movement == 'LEFT':
     destination = [playerCoord[0], playerCoord[1]-1]
-  if movement == 'RIGHT':
+  elif movement == 'RIGHT':
     destination = [playerCoord[0], playerCoord[1]+1]
+  else:
+    return 'Invalid movement !'
+  
   if pathIsClear(grid, destination):
     newGrid[playerCoord[0]][playerCoord[1]] = 0
     newGrid[destination[0]][destination[1]] = 'x'
     return newGrid
+  elif boxIsHere(grid, destination):
+    boxCoord = destination
+    if movement == 'UP':
+      boxDestination = [boxCoord[0]-1, boxCoord[1]]
+    elif movement == 'DOWN':
+      boxDestination = [boxCoord[0]+1, boxCoord[1]]
+    elif movement == 'LEFT':
+      boxDestination = [boxCoord[0], boxCoord[1]-1]
+    elif movement == 'RIGHT':
+      boxDestination = [boxCoord[0], boxCoord[1]+1]
+    if pathIsClear(grid, boxDestination):
+      newGrid[playerCoord[0]][playerCoord[1]] = 0
+      newGrid[destination[0]][destination[1]] = 'x'
+      newGrid[boxDestination[0]][boxDestination[1]] = '@'
+      return newGrid
 
+    
   return grid
 
 grid = initGrid(lvl0)
