@@ -52,19 +52,33 @@ def getPlayerCoordinates(grid):
       if i == 'x' :
         return [r, c]
 
-# def updateGrid(grid):
-#   newGrid = grid
+def pathIsClear(grid, destination):
+  if grid[destination[0]][destination[1]]==0:
+    return True
+  return False
 
-  
-    
-  # if movement == 'UP':
-  #   destination = 
+def updateGrid(grid, movement):
+  newGrid = grid
+  playerCoord = getPlayerCoordinates(grid)
+  if movement == 'UP':
+    destination = [playerCoord[0]-1, playerCoord[1]]
+  if movement == 'DOWN':
+    destination = [playerCoord[0]+1, playerCoord[1]]
+  if movement == 'LEFT':
+    destination = [playerCoord[0], playerCoord[1]-1]
+  if movement == 'RIGHT':
+    destination = [playerCoord[0], playerCoord[1]+1]
+  if pathIsClear(grid, destination):
+    newGrid[playerCoord[0]][playerCoord[1]] = 0
+    newGrid[destination[0]][destination[1]] = 'x'
+    return newGrid
 
-
-  # return grid
+  return grid
 
 grid = initGrid(lvl0)
-print(getPlayerCoordinates(grid))
+print(grid)
+updateGrid(grid,'DOWN')
+print(grid)
 # while run: 
 #     ## do stuff
 # pygame.quit() 
