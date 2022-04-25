@@ -1,6 +1,7 @@
 from sqlite3 import Row
 # import pygame   
-import json 
+import json
+from webbrowser import get 
 import numpy as np
 
 
@@ -41,18 +42,29 @@ def initGrid(level):
   print(grid)
   return grid
 
-# def updateGrid(grid, movement):
+def getPlayerCoordinates(grid):
+  r = -1 # row index
+  for row in grid :
+    r+=1
+    c = -1 # column index
+    for i in row :
+      c+=1
+      if i == 'x' :
+        return [r, c]
+
+# def updateGrid(grid):
 #   newGrid = grid
 
-#   for i in grid :
-#     r
-#   if movement == 'UP':
-#     destination = 
+  
+    
+  # if movement == 'UP':
+  #   destination = 
 
 
-#   return grid
+  # return grid
 
-initGrid(lvl0)
+grid = initGrid(lvl0)
+print(getPlayerCoordinates(grid))
 # while run: 
 #     ## do stuff
 # pygame.quit() 
