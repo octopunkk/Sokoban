@@ -61,6 +61,14 @@ def boxIsHere(grid, destination):
     return True
   return False
 
+def levelIsComplete(grid):
+  levelComplete = True
+  for row in grid:
+    for i in row:
+      if i == '*':
+        levelComplete = False
+  return levelComplete
+
 def updateGrid(grid, movement):
   newGrid = grid
   playerCoord = getPlayerCoordinates(grid)
@@ -94,13 +102,21 @@ def updateGrid(grid, movement):
       newGrid[destination[0]][destination[1]] = 'x'
       newGrid[boxDestination[0]][boxDestination[1]] = '@'
       return newGrid
-
-    
+  if levelIsComplete(newGrid):
+    print('level complete !')
   return grid
 
 grid = initGrid(lvl0)
 print(grid)
 updateGrid(grid,'DOWN')
+print(grid)
+updateGrid(grid,'RIGHT')
+print(grid)
+updateGrid(grid,'DOWN')
+print(grid)
+updateGrid(grid,'LEFT')
+print(grid)
+updateGrid(grid,'LEFT')
 print(grid)
 # while run: 
 #     ## do stuff
