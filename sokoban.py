@@ -1,14 +1,11 @@
-from sqlite3 import Row
-# import pygame   
+from tarfile import BLOCKSIZE
+import pygame   
 import json
-from webbrowser import get 
 import numpy as np
 
-
-# pygame.init()  
-# window = pygame.display.set_mode((600, 600)) 
-# pygame.display.set_caption("Sokoban") 
-
+pygame.init()  
+window = pygame.display.set_mode((500, 500)) 
+pygame.display.set_caption("Sokoban")
 run = True
 with open('level0.json', 'r') as f:
   lvl0 = json.load(f)
@@ -23,6 +20,13 @@ with open('level0.json', 'r') as f:
 # Goal = *
 # Wall = #
 # Empty = 0
+
+RED = (255, 0, 0) # Player
+GREEN = (0, 255, 0) # Goal
+BLUE = (0, 0, 255) # Box
+WHITE = (255, 255, 255) # Empty
+BLACK = (0,0,0) # Wall
+BLOCKSIZE = 100
 
 
 def initGrid(level):
@@ -106,19 +110,56 @@ def updateGrid(grid, movement):
     print('level complete !')
   return grid
 
+def paintGrid(grid):
+  rowIndex = -1
+  for row in grid:
+    rowIndex+=1
+    columnIndex = -1
+    for i in row :
+      columnIndex+=1
+      if i == 'x':
+        pygame.draw.rect(window, RED, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)) 
+        pygame.draw.rect(window, WHITE, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE),width=5) 
+      elif i == '@':
+        pygame.draw.rect(window, BLUE, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)) 
+        pygame.draw.rect(window, WHITE, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE),width=5) 
+      elif i == '#':
+        pygame.draw.rect(window, BLACK, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE))
+        pygame.draw.rect(window, WHITE, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE),width=5) 
+      elif i == '*':
+        pygame.draw.rect(window, GREEN, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)) 
+        pygame.draw.rect(window, WHITE, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE),width=5) 
+      elif i == 0:
+        pygame.draw.rect(window, WHITE, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE))
+        pygame.draw.rect(window, WHITE, pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE),width=5) 
+
+      pygame.display.flip() 
+
+      
+
 grid = initGrid(lvl0)
-print(grid)
-updateGrid(grid,'DOWN')
-print(grid)
-updateGrid(grid,'RIGHT')
-print(grid)
-updateGrid(grid,'DOWN')
-print(grid)
-updateGrid(grid,'LEFT')
-print(grid)
-updateGrid(grid,'LEFT')
-print(grid)
-# while run: 
-#     ## do stuff
-# pygame.quit() 
+
+while run:
+  pygame.time.delay(10) 
+  hasMoved = False 
+  paintGrid(grid)
+  for event in pygame.event.get(): 
+    if event.type == pygame.QUIT:  
+        run = False
+  keys = pygame.key.get_pressed() 
+  if keys[pygame.K_LEFT]:
+    grid = updateGrid(grid, 'LEFT')
+    hasMoved = True
+  elif keys[pygame.K_RIGHT]:
+    grid = updateGrid(grid, 'RIGHT')
+    hasMoved = True
+  elif keys[pygame.K_UP]:
+    grid = updateGrid(grid, 'UP')
+    hasMoved = True
+  elif keys[pygame.K_DOWN]:
+    grid = updateGrid(grid, 'DOWN')
+    hasMoved = True
+  if hasMoved:
+    pygame.time.delay(100) 
+  paintGrid(grid)
 
