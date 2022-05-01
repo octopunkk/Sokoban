@@ -64,36 +64,33 @@ def levelIsComplete(grid):
     return levelComplete
 
 
+def movementHandler(movement, coordinates):
+    x, y = coordinates
+    match movement:
+        case "UP":
+            destination = [x - 1, y]
+        case "DOWN":
+            destination = [x + 1, y]
+        case "LEFT":
+            destination = [x, y - 1]
+        case "RIGHT":
+            destination = [x, y + 1]
+        case _:
+            destination = "Invalid movement !"
+    return destination
+
+
 def updateGrid(grid, movement):
     newGrid = grid
     playerCoord = getPlayerCoordinates(grid)
-    match movement:
-        case "UP":
-            destination = [playerCoord[0] - 1, playerCoord[1]]
-        case "DOWN":
-            destination = [playerCoord[0] + 1, playerCoord[1]]
-        case "LEFT":
-            destination = [playerCoord[0], playerCoord[1] - 1]
-        case "RIGHT":
-            destination = [playerCoord[0], playerCoord[1] + 1]
-        case _:
-            return "Invalid movement !"
+    destination = movementHandler(movement, playerCoord)
 
     if pathIsClear(grid, destination):
         newGrid[playerCoord[0]][playerCoord[1]] = 0
         newGrid[destination[0]][destination[1]] = "x"
         return newGrid
     elif boxIsHere(grid, destination):
-        boxCoord = destination
-        match movement:
-            case "UP":
-                boxDestination = [boxCoord[0] - 1, boxCoord[1]]
-            case "DOWN":
-                boxDestination = [boxCoord[0] + 1, boxCoord[1]]
-            case "LEFT":
-                boxDestination = [boxCoord[0], boxCoord[1] - 1]
-            case "RIGHT":
-                boxDestination = [boxCoord[0], boxCoord[1] + 1]
+        boxDestination = movementHandler(movement, destination)
         if pathIsClear(grid, boxDestination):
             newGrid[playerCoord[0]][playerCoord[1]] = 0
             newGrid[destination[0]][destination[1]] = "x"
