@@ -31,54 +31,37 @@ BLOCKSIZE = 100
 
 
 def initGrid(level):
-    player = level["player"]
-    walls = level["walls"]
-    boxes = level["boxes"]
-    goals = level["goals"]
-    size = level["size"]
-    grid = [[0] * size for _ in range(size)]
-    for wall in walls:
-        grid[wall[0]][wall[1]] = "#"
-    for box in boxes:
-        grid[box[0]][box[1]] = "@"
-    for goal in goals:
-        grid[goal[0]][goal[1]] = "*"
-    grid[player[0]][player[1]] = "x"
+    grid = [[0] * level["size"] for _ in range(level["size"])]
+    for x, y in level["walls"]:
+        grid[x][y] = "#"
+    for x, y in level["boxes"]:
+        grid[x][y] = "@"
+    for x, y in level["goals"]:
+        grid[x][y] = "*"
+    player_x, player_y = level["player"]
+    grid[player_x][player_y] = "x"
     return grid
 
 
 def getPlayerCoordinates(grid):
-    r = -1  # row index
-    for row in grid:
-        r += 1
-        c = -1  # column index
-        for i in row:
-            c += 1
-            if i == "x":
-                return [r, c]
+    return [(index, row.index("x")) for index, row in enumerate(grid) if 'x' in row][0]
 
 
 def pathIsClear(grid, destination):
-    if (
-        grid[destination[0]][destination[1]] == 0
-        or grid[destination[0]][destination[1]] == "*"
-    ):
-        return True
-    return False
+    x, y = destination
+    return grid[x][y] == 0 or grid[x][y] == "*"
 
 
 def boxIsHere(grid, destination):
-    if grid[destination[0]][destination[1]] == "@":
-        return True
-    return False
+    x, y = destination
+    return grid[x][y] == "@"
 
 
 def levelIsComplete(grid):
     levelComplete = True
     for row in grid:
-        for i in row:
-            if i == "*":
-                levelComplete = False
+        if "*" in row:
+            levelComplete = False
     return levelComplete
 
 
@@ -123,14 +106,10 @@ def updateGrid(grid, movement):
 
 
 def paintGrid(grid):
-    rowIndex = -1
-    for row in grid:
-        rowIndex += 1
-        columnIndex = -1
-        for i in row:
-            columnIndex += 1
+    for rowIndex, row in enumerate(grid):
+        for columnIndex, column in enumerate(row):
             rectangle = pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)
-            match i:
+            match column:
                 case "x":
                     pygame.draw.rect(window, RED, rectangle)
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
