@@ -4,7 +4,6 @@ import json
 pygame.init()
 window = pygame.display.set_mode((500, 500))
 pygame.display.set_caption("Sokoban")
-run = True
 with open("level0.json", "r") as f:
     lvl0 = json.load(f)
 
@@ -129,28 +128,33 @@ def paintGrid(grid):
             pygame.display.flip()
 
 
-grid = initGrid(lvl0)
+def main(level):
+    run = True
+    grid = initGrid(level)
 
-while run:
-    pygame.time.delay(10)
-    hasMoved = False
-    paintGrid(grid)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
-        grid = updateGrid(grid, "LEFT")
-        hasMoved = True
-    elif keys[pygame.K_RIGHT]:
-        grid = updateGrid(grid, "RIGHT")
-        hasMoved = True
-    elif keys[pygame.K_UP]:
-        grid = updateGrid(grid, "UP")
-        hasMoved = True
-    elif keys[pygame.K_DOWN]:
-        grid = updateGrid(grid, "DOWN")
-        hasMoved = True
-    if hasMoved:
-        pygame.time.delay(100)
-    paintGrid(grid)
+    while run:
+        pygame.time.delay(10)
+        hasMoved = False
+        paintGrid(grid)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]:
+            grid = updateGrid(grid, "LEFT")
+            hasMoved = True
+        elif keys[pygame.K_RIGHT]:
+            grid = updateGrid(grid, "RIGHT")
+            hasMoved = True
+        elif keys[pygame.K_UP]:
+            grid = updateGrid(grid, "UP")
+            hasMoved = True
+        elif keys[pygame.K_DOWN]:
+            grid = updateGrid(grid, "DOWN")
+            hasMoved = True
+        if hasMoved:
+            pygame.time.delay(100)
+        paintGrid(grid)
+
+
+main(lvl0)
