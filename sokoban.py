@@ -34,6 +34,8 @@ push_box_right: 6
 push_box_up:    7 
 """
 
+int_to_input = {0:"LEFT", 1:"DOWN", 2:"RIGHT", 3:"UP", 4:"LEFT", 5:"DOWN", 6:"RIGHT", 7:"UP",}
+
 
 RED = (255, 0, 0)  # Player
 GREEN = (0, 255, 0)  # Goal
@@ -139,27 +141,36 @@ def paintGrid(grid):
             pygame.display.flip()
 
 
-def gameStep(grid, keys, hasMoved, simulate=False):
-    tmp_grid = grid
+def gameStep(grid, keys, hasMoved):
     if keys[pygame.K_LEFT]:
-        tmp_grid = updateGrid(grid, "LEFT")
+        grid = updateGrid(grid, "LEFT")
         hasMoved = True
     elif keys[pygame.K_RIGHT]:
-        tmp_grid = updateGrid(grid, "RIGHT")
+        grid = updateGrid(grid, "RIGHT")
         hasMoved = True
     elif keys[pygame.K_UP]:
-        tmp_grid = updateGrid(grid, "UP")
+        grid = updateGrid(grid, "UP")
         hasMoved = True
     elif keys[pygame.K_DOWN]:
-        tpm_grid = updateGrid(grid, "DOWN")
+        grid = updateGrid(grid, "DOWN")
         hasMoved = True
     if hasMoved:
         pygame.time.delay(100)
-    if not simulate:
-        grid = tmp_grid
-    else:
-        return tmp_grid
-    return grid, hasMoved
+    reward = getReward(grid)
+    return grid, hasMoved, reward
+
+
+def simulateStep(grid, key):
+    match key:
+        case "LEFT":
+            grid = updateGrid(grid, "LEFT")
+        case "DOWN":
+            grid = updateGrid(grid, "DOWN")
+        case "RIGHT":
+            grid = updateGrid(grid, "RIGHT")
+        case "UP":
+            grid = updateGrid(grid, "UP")
+    return grid
 
 
 def computeState(grid):
@@ -190,6 +201,15 @@ def computeActions(grid):
     return possible_movements
 
 
+def futurePossibleStates(grid):
+    actions = computeActions(grid)
+    start_state = computeState(grid)
+    states = []
+    for action in actions:
+        states.append(computeState(simulateStep(grid, action)))
+    return [(action, state) for action, state in zip(actions, states)]
+
+
 def getReward(grid, current_board):
     init_goals = len(current_board['goals'])
     levelComplete = 0
@@ -214,9 +234,8 @@ def main(level):
             if event.type == pygame.QUIT:
                 run = False
         keys = pygame.key.get_pressed()
-        grid, hasMoved = gameStep(grid, keys, hasMoved)
+        grid, hasMoved, _ = gameStep(grid, keys, hasMoved)
         paintGrid(grid)
-        print(computeActions(grid))
 
 
 if __name__ == "__main__":
