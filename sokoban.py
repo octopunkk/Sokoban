@@ -1,11 +1,13 @@
-import pygame
 import json
+
+import pygame
 
 pygame.init()
 window = pygame.display.set_mode((500, 500))
 pygame.display.set_caption("Sokoban")
 with open("level0.json", "r") as f:
     lvl0 = json.load(f)
+
 
 """
 Lvl 0 :
@@ -19,7 +21,19 @@ Box = @
 Goal = *
 Wall = #
 Empty = 0
+
+
+actions : 
+left:           0
+down:           1
+right:          2
+up:             3
+push_box_left:  4
+push_box_down:  5
+push_box_right: 6
+push_box_up:    7 
 """
+
 
 RED = (255, 0, 0)  # Player
 GREEN = (0, 255, 0)  # Goal
@@ -125,6 +139,69 @@ def paintGrid(grid):
             pygame.display.flip()
 
 
+def gameStep(grid, keys, hasMoved, simulate=False):
+    tmp_grid = grid
+    if keys[pygame.K_LEFT]:
+        tmp_grid = updateGrid(grid, "LEFT")
+        hasMoved = True
+    elif keys[pygame.K_RIGHT]:
+        tmp_grid = updateGrid(grid, "RIGHT")
+        hasMoved = True
+    elif keys[pygame.K_UP]:
+        tmp_grid = updateGrid(grid, "UP")
+        hasMoved = True
+    elif keys[pygame.K_DOWN]:
+        tpm_grid = updateGrid(grid, "DOWN")
+        hasMoved = True
+    if hasMoved:
+        pygame.time.delay(100)
+    if not simulate:
+        grid = tmp_grid
+    else:
+        return tmp_grid
+    return grid, hasMoved
+
+
+def computeState(grid):
+    state = []
+    for row in grid:
+        state += row
+    return state
+
+
+def computeActions(grid):
+    all_movements = ["LEFT", "DOWN", "RIGHT", "UP"]
+    possible_movements = []
+    playerCoord = getPlayerCoordinates(grid)
+    for index, move in enumerate(all_movements):
+        destination = movementHandler(move, playerCoord)
+        if pathIsClear(grid, destination):
+            possible_movements.append(index)
+        elif boxIsHere(grid, destination):
+            match move:
+                case "LEFT":
+                    possible_movements.append(4)
+                case "DOWN":
+                    possible_movements.append(5)
+                case "RIGHT":
+                    possible_movements.append(6)
+                case "UP":
+                    possible_movements.append(7)
+    return possible_movements
+
+
+def getReward(grid, current_board):
+    init_goals = len(current_board['goals'])
+    levelComplete = 0
+    left_goals = 0
+    for row in grid:
+        if "*" in row:
+            left_goals += 1
+    if left_goals == 0:
+        levelComplete = 1
+    return 1 + levelComplete*10 + (init_goals - left_goals)*5
+
+
 def main(level):
     run = True
     grid = initGrid(level)
@@ -137,21 +214,10 @@ def main(level):
             if event.type == pygame.QUIT:
                 run = False
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            grid = updateGrid(grid, "LEFT")
-            hasMoved = True
-        elif keys[pygame.K_RIGHT]:
-            grid = updateGrid(grid, "RIGHT")
-            hasMoved = True
-        elif keys[pygame.K_UP]:
-            grid = updateGrid(grid, "UP")
-            hasMoved = True
-        elif keys[pygame.K_DOWN]:
-            grid = updateGrid(grid, "DOWN")
-            hasMoved = True
-        if hasMoved:
-            pygame.time.delay(100)
+        grid, hasMoved = gameStep(grid, keys, hasMoved)
         paintGrid(grid)
+        print(computeActions(grid))
 
 
-main(lvl0)
+if __name__ == "__main__":
+    main(lvl0)
