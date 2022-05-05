@@ -156,7 +156,7 @@ def gameStep(grid, keys, hasMoved):
         hasMoved = True
     if hasMoved:
         pygame.time.delay(100)
-    reward = getReward(grid)
+    reward = getReward(grid, lvl0)
     return grid, hasMoved, reward
 
 
