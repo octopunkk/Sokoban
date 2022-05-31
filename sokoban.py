@@ -147,15 +147,17 @@ class Sokoban():
                     newGrid[boxDestination[0]][boxDestination[1]] = "$"
                 else:
                     newGrid[boxDestination[0]][boxDestination[1]] = "@"
+        reward = self.getReward(lvl0)
         if self.levelIsComplete(newGrid):
             print("level complete !")
+            reward = 10
         elif self.levelIsLost(newGrid):
             print("level lost !")
+            reward = -10
         hasMoved = self.grid == newGrid
         if hasMoved:
             self.grid = newGrid
             pygame.time.delay(100)
-        reward = self.getReward(lvl0)
         return reward
 
     def paintGrid(self):
