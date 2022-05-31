@@ -87,27 +87,29 @@ class Sokoban():
         for row in newgrid:
             if "*" in row:
                 levelComplete = False
+            elif "." in row:
+                levelComplete = False
         return levelComplete
 
-    def movementHandler(self, movement, coordinates):
+    def movementHandler(self, keys, coordinates):
         x, y = coordinates
-        match movement:
-            case "UP":
-                destination = [x - 1, y]
-            case "DOWN":
-                destination = [x + 1, y]
-            case "LEFT":
-                destination = [x, y - 1]
-            case "RIGHT":
-                destination = [x, y + 1]
-            case _:
-                destination = "Invalid movement !"
+        destination = "Invalid movement !"
+        if keys[pygame.K_LEFT]:
+            destination = [x, y - 1]
+        elif keys[pygame.K_RIGHT]:
+            destination = [x, y + 1]
+        elif keys[pygame.K_UP]:
+            destination = [x - 1, y]
+        elif keys[pygame.K_DOWN]:
+            destination = [x + 1, y]
         return destination
 
-    def updateGrid(self, movement):
+    def updateGrid(self, keys):
         newGrid = self.grid
         playerCoord = self.getPlayerCoordinates()
-        destination = self.movementHandler(movement, playerCoord)
+        destination = self.movementHandler(keys, playerCoord)
+        if destination == "Invalid movement !":
+            return
 
         if self.pathIsClear(destination):
             if self.grid[playerCoord[0]][playerCoord[1]] == ".":
@@ -118,9 +120,8 @@ class Sokoban():
                 newGrid[destination[0]][destination[1]] = "."
             else:
                 newGrid[destination[0]][destination[1]] = "x"
-            return newGrid
         elif self.boxIsHere(destination):
-            boxDestination = self.movementHandler(movement, destination)
+            boxDestination = self.movementHandler(keys, destination)
             if self.pathIsClear(boxDestination):
                 if self.grid[playerCoord[0]][playerCoord[1]] == ".":
                     newGrid[playerCoord[0]][playerCoord[1]] = "*"
@@ -136,10 +137,14 @@ class Sokoban():
                     newGrid[boxDestination[0]][boxDestination[1]] = "$"
                 else:
                     newGrid[boxDestination[0]][boxDestination[1]] = "@"
-                return newGrid
         if self.levelIsComplete(newGrid):
             print("level complete !")
-        return newGrid
+        hasMoved = self.grid == newGrid
+        if hasMoved:
+            self.grid = newGrid
+            pygame.time.delay(100)
+        reward = self.getReward(lvl0)
+        return reward
 
     def paintGrid(self):
         for rowIndex, row in enumerate(self.grid):
@@ -252,13 +257,12 @@ def main(level):
 
     while run:
         pygame.time.delay(10)
-        hasMoved = False
         game.paintGrid()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
         keys = pygame.key.get_pressed()
-        hasMoved, _ = game.gameStep(keys, hasMoved)
+        game.updateGrid(keys)
         game.paintGrid()
 
 
