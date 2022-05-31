@@ -1,4 +1,5 @@
 import json
+from platform import platform
 import pygame
 import copy
 from math import dist
@@ -48,6 +49,7 @@ class Sokoban():
     current_level = ""
     list_level = []
     window = None
+    count_move = 0
 
     def __init__(self, list_level) -> None:
         self.list_level = list_level
@@ -76,6 +78,7 @@ class Sokoban():
                 self.grid[x][y] = 2
         player_x, player_y = self.current_level["player"]
         self.grid[player_x][player_y] = 9
+        self.count_move = 0
 
     def getPlayerCoordinates(self):
         player_pos = [(index, row.index(9)) for index, row in enumerate(self.grid) if 9 in row]
@@ -201,7 +204,8 @@ class Sokoban():
         if hasMoved:
             self.grid = newGrid
             # pygame.time.delay(100)
-        return reward, (reward==100 or reward==-100)
+        self.count_move += 1
+        return reward, (reward == 100 or reward == -100)
 
     def paintGrid(self):
         for rowIndex, row in enumerate(self.grid):
@@ -257,53 +261,48 @@ class Sokoban():
         for action in actions:
             states.append(self.computeState(self.calculateGrid(action)))
         return [(action, state) for action, state in zip(actions, states)]
-    
-    def boxNearGoal(self):
-        boxs = []
-        platforms = []
-        for xindex, row in enumerate(self.grid):
-            for yindex, square in enumerate(row):
-                match square:
-                    case 1:
-                        boxs.append((xindex, yindex))
-                    case 2:
-                        platforms.append((xindex, yindex))
-                    case 4:
-                        platforms.append((xindex, yindex))
+
+    def boxNearGoal(self, boxCoord):
+        boxs = boxCoord
+        platforms = self.current_level["goals"]
         distances = []
         for box_coords in boxs:
             for platform_coords in platforms:
                 distances.append(dist(box_coords, platform_coords))
         reward = 0
         for dst in distances:
-            reward += (1 - dst)*5
-        return reward
+            reward += (2 - dst)*(20/self.count_move)
+        return reward*0.5
 
     def boxMoved(self, newGrid):
         list_box_coord = []
         for index_row, row in enumerate(newGrid):
             for index_col, col in enumerate(row):
                 if 1 == col:
-                    if self.grid[index_row][index_col] != 1:
-                        list_box_coord.append([index_row, index_col])
+                    list_box_coord.append([index_row, index_col])
                 if 5 == col:
-                    if self.grid[index_row][index_col] != 5:
-                        list_box_coord.append([index_row, index_col])
+                    list_box_coord.append([index_row, index_col])
         return list_box_coord
 
     def getReward(self, newGrid):
-        reward = 0
-        init_goals = len(self.current_level['goals'])
-        levelComplete = 0
-        left_goals = 0
-        for row in newGrid:
-            if (2 in row) or (4 in row):
-                left_goals += 1
-        moved = self.boxMoved(newGrid)
-        print(moved)
-        if len(moved) != 0:
-            reward += self.boxNearGoal()
-            reward += (init_goals - left_goals)*10
+        reward = -1
+        # init_goals = len(self.current_level['goals'])
+        # levelComplete = 0
+        # left_goals = 0
+        # for row in newGrid:
+        #     if (2 in row) or (4 in row):
+        #         left_goals += 1
+        list_old_box_coord = self.boxMoved(self.grid)
+        list_box_coord = self.boxMoved(newGrid)
+        if list_old_box_coord != list_box_coord:
+            for plateform in self.current_level['goals']:
+                for old_box_coord in list_old_box_coord:
+                    for box_coord in list_box_coord:
+                        if dist(old_box_coord, plateform) < dist(box_coord, plateform):
+                            reward -= 5
+                        elif dist(old_box_coord, plateform) > dist(box_coord, plateform):
+                            reward += 5
+            # reward += (init_goals - left_goals)*10
         return reward
 
 

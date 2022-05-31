@@ -1,3 +1,4 @@
+from csv import list_dialects
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from collections import deque
@@ -116,7 +117,8 @@ class Agent:
         :param reward:reward received
         :param done:boolean value to signify whether the end of an episode is reached
         """
-        self.memory.append((previous_state, next_state, reward, done))
+        if self.memory.count((previous_state, next_state, reward, done)) == 0:
+            self.memory.append((previous_state, next_state, reward, done))
 
     def save(self, path: str):
         """
@@ -140,8 +142,11 @@ class Agent:
         """
         if len(self.memory) < batch_size:
             return
+        list_reward = [x[-2] for x in self.memory]
         # Randomly select a batch of experiences
-        experiences = random.sample(self.memory, batch_size)
+        experiences = random.sample(self.memory, batch_size-4)
+        for i in sorted(list_reward, reverse=True)[:4]:
+            experiences.append(self.memory[list_reward.index(i)])
 
         # compute the target for the neural network
         next_states = [experience[1] for experience in experiences]
@@ -162,7 +167,6 @@ class Agent:
         self.epsilon = max(
             self.epsilon * self.decay, self.epsilon_min
         )  # explore less
-
 
 if __name__ == "__main__":
     dqn = Agent()
