@@ -106,24 +106,23 @@ class Sokoban():
         levelLost = False
         lost_cube = 0
         for index_row, row in enumerate(newgrid):
-            if 1 in row:
-                index_col = row.index(1)
-                if newgrid[index_row][index_col - 1] == 3 or newgrid[index_row][index_col + 1] == 3:
-                    if newgrid[index_row + 1][index_col] == 3 or newgrid[index_row - 1][index_col] == 3:
-                        levelLost = True
-                    if newgrid[index_row + 1][index_col] in (1, 5) or newgrid[index_row - 1][index_col] in (1, 5):
-                        lost_cube += 1
-                if newgrid[index_row][index_col - 1] in (1, 5) or newgrid[index_row][index_col + 1] in (1, 5):
-                    if newgrid[index_row + 1][index_col] in (1, 5, 3) or newgrid[index_row - 1][index_col] in (1, 5, 3):
-                        lost_cube += 1
-            if 5 in row:
-                index_col = row.index(5)
-                if newgrid[index_row][index_col - 1] == 3 or newgrid[index_row][index_col + 1] == 3:
-                    if newgrid[index_row + 1][index_col] in (1, 5) or newgrid[index_row - 1][index_col] in (1, 5):
-                        lost_cube += 1
-                if newgrid[index_row][index_col - 1] in (1, 5) or newgrid[index_row][index_col + 1] in (1, 5):
-                    if newgrid[index_row + 1][index_col] in (1, 5, 3) or newgrid[index_row - 1][index_col] in (1, 5, 3):
-                        lost_cube += 1
+            for index_col, col in enumerate(row):
+                if col == 1:
+                    if newgrid[index_row][index_col - 1] == 3 or newgrid[index_row][index_col + 1] == 3:
+                        if newgrid[index_row + 1][index_col] == 3 or newgrid[index_row - 1][index_col] == 3:
+                            levelLost = True
+                        if newgrid[index_row + 1][index_col] in (1, 5) or newgrid[index_row - 1][index_col] in (1, 5):
+                            lost_cube += 1
+                    if newgrid[index_row][index_col - 1] in (1, 5) or newgrid[index_row][index_col + 1] in (1, 5):
+                        if newgrid[index_row + 1][index_col] in (1, 5, 3) or newgrid[index_row - 1][index_col] in (1, 5, 3):
+                            lost_cube += 1
+                if col == 5:
+                    if newgrid[index_row][index_col - 1] == 3 or newgrid[index_row][index_col + 1] == 3:
+                        if newgrid[index_row + 1][index_col] in (1, 5) or newgrid[index_row - 1][index_col] in (1, 5):
+                            lost_cube += 1
+                    if newgrid[index_row][index_col - 1] in (1, 5) or newgrid[index_row][index_col + 1] in (1, 5):
+                        if newgrid[index_row + 1][index_col] in (1, 5, 3) or newgrid[index_row - 1][index_col] in (1, 5, 3):
+                            lost_cube += 1
         if lost_cube == len(self.current_level["boxes"]):
             levelLost = True
         return levelLost
@@ -285,8 +284,19 @@ class Sokoban():
 
     def boxMoved(self):
 
+    def boxMoved(self, newGrid):
+        list_box_coord = []
+        for index_row, row in enumerate(newGrid):
+            for index_col, col in enumerate(row):
+                if 1 == col:
+                    if self.grid[index_row][index_col] != 1:
+                        list_box_coord.append([index_row, index_col])
+                if 5 == col:
+                    if self.grid[index_row][index_col] != 5:
+                        list_box_coord.append([index_row, index_col])
+        return list_box_coord
 
-    def getReward(self, newGrid):
+    def getReward(self):
         reward = 0
         init_goals = len(self.current_level['goals'])
         levelComplete = 0
