@@ -51,19 +51,28 @@ BLOCKSIZE = 100
 
 class Sokoban():
     grid = []
+    current_level = ""
+    list_level = []
 
-    def initGrid(self, level):
-        self.grid = [[0] * level["size"] for _ in range(level["size"])]
-        for x, y in level["walls"]:
+    def __init__(self, list_level) -> None:
+        self.list_level = list_level
+
+    def nextLevel(self):
+        with open(self.list_level.pop(), "r") as f:
+            self.current_level = json.load(f)
+
+    def initGrid(self):
+        self.grid = [[0] * self.current_level["size"] for _ in range(self.current_level["size"])]
+        for x, y in self.current_level["walls"]:
             self.grid[x][y] = "#"
-        for x, y in level["boxes"]:
+        for x, y in self.current_level["boxes"]:
             self.grid[x][y] = "@"
-        for x, y in level["goals"]:
+        for x, y in self.current_level["goals"]:
             if self.grid[x][y] == "@":
                 self.grid[x][y] = "$"
             else:
                 self.grid[x][y] = "*"
-        player_x, player_y = level["player"]
+        player_x, player_y = self.current_level["player"]
         self.grid[player_x][player_y] = "x"
 
     def getPlayerCoordinates(self):
@@ -189,24 +198,6 @@ class Sokoban():
 
                 pygame.display.flip()
 
-    def gameStep(self, keys, hasMoved):
-        if keys[pygame.K_LEFT]:
-            self.grid = self.updateGrid("LEFT")
-            hasMoved = True
-        elif keys[pygame.K_RIGHT]:
-            self.grid = self.updateGrid("RIGHT")
-            hasMoved = True
-        elif keys[pygame.K_UP]:
-            self.grid = self.updateGrid("UP")
-            hasMoved = True
-        elif keys[pygame.K_DOWN]:
-            self.grid = self.updateGrid("DOWN")
-            hasMoved = True
-        if hasMoved:
-            pygame.time.delay(100)
-        reward = self.getReward(lvl0)
-        return hasMoved, reward
-
     def simulateStep(self, key):
         match key:
             case "LEFT":
@@ -266,8 +257,9 @@ class Sokoban():
 
 def main(level):
     run = True
-    game = Sokoban()
-    game.initGrid(level)
+    game = Sokoban(['levels/microban_0.json', 'levels/microban_1.json'])
+    game.nextLevel()
+    game.initGrid()
 
     while run:
         pygame.time.delay(10)
@@ -276,7 +268,12 @@ def main(level):
             if event.type == pygame.QUIT:
                 run = False
         keys = pygame.key.get_pressed()
-        game.updateGrid(keys)
+        res = game.updateGrid(keys)
+        if res == -10:
+            game.initGrid()
+        elif res == 10:
+            game.nextLevel()
+            game.initGrid()
         game.paintGrid()
 
 
