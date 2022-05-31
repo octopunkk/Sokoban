@@ -117,7 +117,6 @@ class Sokoban():
     def movementHandler(self, keys, coordinates):
         x, y = coordinates
         destination = "Invalid movement !"
-        print(type(keys))
         if (type(keys) == pygame.key.ScancodeWrapper):
             if keys[pygame.K_LEFT]:
                 destination = [x, y - 1]
@@ -139,10 +138,10 @@ class Sokoban():
                     destination = [x + 1, y]
         return destination
 
-    def updateGrid(self, keys):
+    def calculateGrid(self, key):
         newGrid = self.grid
         playerCoord = self.getPlayerCoordinates()
-        destination = self.movementHandler(keys, playerCoord)
+        destination = self.movementHandler(key, playerCoord)
         if destination == "Invalid movement !":
             return
 
@@ -156,7 +155,7 @@ class Sokoban():
             else:
                 newGrid[destination[0]][destination[1]] = "x"
         elif self.boxIsHere(destination):
-            boxDestination = self.movementHandler(keys, destination)
+            boxDestination = self.movementHandler(key, destination)
             if self.pathIsClear(boxDestination):
                 if self.grid[playerCoord[0]][playerCoord[1]] == ".":
                     newGrid[playerCoord[0]][playerCoord[1]] = "*"
@@ -172,6 +171,10 @@ class Sokoban():
                     newGrid[boxDestination[0]][boxDestination[1]] = "$"
                 else:
                     newGrid[boxDestination[0]][boxDestination[1]] = "@"
+        return newGrid
+
+    def updateGrid(self, key):
+        newGrid = self.calculateGrid(key)
         reward = self.getReward()
         if self.levelIsComplete(newGrid):
             print("level complete !")
@@ -214,17 +217,6 @@ class Sokoban():
 
                 pygame.display.flip()
 
-    def simulateStep(self, key):
-        match key:
-            case "LEFT":
-                self.grid = self.updateGrid("LEFT")
-            case "DOWN":
-                self.grid = self.updateGrid("DOWN")
-            case "RIGHT":
-                self.grid = self.updateGrid("RIGHT")
-            case "UP":
-                self.grid = self.updateGrid("UP")
-
     def computeState(self):
         state = []
         for row in self.grid:
@@ -248,7 +240,7 @@ class Sokoban():
         start_state = self.computeState()
         states = []
         for action in actions:
-            states.append(self.computeState(self.simulateStep(action)))
+            states.append(self.computeState(self.calculateGrid(action)))
         return [(action, state) for action, state in zip(actions, states)]
 
     def getReward(self):
