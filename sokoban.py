@@ -22,6 +22,7 @@ Goal = *
 Wall = #
 Empty = 0
 player + goal = .
+goal + box = $
 
 
 actions : 
@@ -43,6 +44,7 @@ GREEN = (0, 255, 0)  # Goal
 BLUE = (0, 0, 255)  # Box
 WHITE = (255, 255, 255)  # Empty
 BLACK = (0, 0, 0)  # Wall
+PURPLE = (128, 0, 128)
 BLOCKSIZE = 100
 
 
@@ -53,7 +55,10 @@ def initGrid(level):
     for x, y in level["boxes"]:
         grid[x][y] = "@"
     for x, y in level["goals"]:
-        grid[x][y] = "*"
+        if grid[x][y] == "@":
+            grid[x][y] = "$"
+        else:
+            grid[x][y] = "*"
     player_x, player_y = level["player"]
     grid[player_x][player_y] = "x"
     return grid
@@ -75,7 +80,7 @@ def pathIsClear(grid, destination):
 
 def boxIsHere(grid, destination):
     x, y = destination
-    return grid[x][y] == "@"
+    return grid[x][y] in ("@", "$")
 
 
 def levelIsComplete(grid):
@@ -120,9 +125,20 @@ def updateGrid(grid, movement):
     elif boxIsHere(grid, destination):
         boxDestination = movementHandler(movement, destination)
         if pathIsClear(grid, boxDestination):
-            newGrid[playerCoord[0]][playerCoord[1]] = 0
-            newGrid[destination[0]][destination[1]] = "x"
-            newGrid[boxDestination[0]][boxDestination[1]] = "@"
+            if grid[playerCoord[0]][playerCoord[1]] == ".":
+                newGrid[playerCoord[0]][playerCoord[1]] = "*"
+            else:
+                newGrid[playerCoord[0]][playerCoord[1]] = 0
+
+            if grid[destination[0]][destination[1]] == "$":
+                newGrid[destination[0]][destination[1]] = "."
+            else:
+                newGrid[destination[0]][destination[1]] = "x"
+
+            if grid[boxDestination[0]][boxDestination[1]] == "*":
+                newGrid[boxDestination[0]][boxDestination[1]] = "$"
+            else:
+                newGrid[boxDestination[0]][boxDestination[1]] = "@"
             return newGrid
     if levelIsComplete(newGrid):
         print("level complete !")
@@ -151,6 +167,9 @@ def paintGrid(grid):
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
                 case ".":
                     pygame.draw.rect(window, RED, rectangle)
+                    pygame.draw.rect(window, WHITE, rectangle, width=5)
+                case "$":
+                    pygame.draw.rect(window, PURPLE, rectangle)
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
 
             pygame.display.flip()

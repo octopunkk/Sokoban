@@ -24,6 +24,7 @@ for level in level_collection:
         level_dict["size"] = int(level.attrib["Width"])
         for line_index, line in enumerate(level):
             for index, char in enumerate(line.text):
+                print(line.text)
                 match char:
                     case '@':
                         level_dict["player"] = [index, line_index]
@@ -34,8 +35,10 @@ for level in level_collection:
                     case '.':
                         level_dict["goals"].append([index, line_index])
                     case '*':
+                        print('test')
                         level_dict["boxes"].append([index, line_index])
                         level_dict["goals"].append([index, line_index])
         with open(f'levels/microban_{level_index}.json', 'w') as outfile:
             json.dump(level_dict, outfile)
         level_index += 1
+        print()
