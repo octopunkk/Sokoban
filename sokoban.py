@@ -143,7 +143,7 @@ class Sokoban():
         playerCoord = self.getPlayerCoordinates()
         destination = self.movementHandler(key, playerCoord)
         if destination == "Invalid movement !":
-            return
+            return None
 
         if self.pathIsClear(destination):
             if self.grid[playerCoord[0]][playerCoord[1]] == 4:
@@ -175,6 +175,8 @@ class Sokoban():
 
     def updateGrid(self, key):
         newGrid = self.calculateGrid(key)
+        if newGrid is None:
+            return 0, False
         reward = self.getReward()
         if self.levelIsComplete(newGrid):
             # print("level complete !")
