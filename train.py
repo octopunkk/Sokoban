@@ -5,7 +5,7 @@ from tqdm import tqdm
 def training():
     
     # --- Initialisation --- #
-    game = sokoban.Sokoban(['levels/microban_0.json', 'levels/microban_1.json'])
+    game = sokoban.Sokoban(['levels/microban_1.json'])
     agent = libagent.Agent(input_size=49, decay=0.9995)
     saving_weights_each_steps = 1000
     print("\n >>> Begin Epsilon = " + str(agent.epsilon))
@@ -13,7 +13,7 @@ def training():
 
     # -- Old params --
     weights = "test"
-    episodes = 10
+    episodes = 100
     
     # -- Episode LOOP -- #
     for i in tqdm(range(episodes)):
@@ -22,11 +22,13 @@ def training():
         game.nextLevel()
         game.initGrid()
         previous_state = game.computeState(game.grid)
+        game.paintGrid()
 
         while not done:
             # fetch all the next possible states.
             possible_future_states = game.futurePossibleStates()
-            print(possible_future_states)
+            # print(possible_future_states)
+            game.paintGrid()
             # the agent then decide the next action
             action, actual_state = agent.act_train(possible_future_states)
 

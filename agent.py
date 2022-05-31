@@ -14,7 +14,7 @@ class Agent:
     def __init__(
         self,
         input_size=4,
-        epsilon=0.9,
+        epsilon=0.7,
         decay=0.9995,
         gamma=0.95,
         loss_fct="mse",

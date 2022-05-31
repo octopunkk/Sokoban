@@ -176,15 +176,15 @@ class Sokoban():
             return 0, False
         reward = self.getReward()
         if self.levelIsComplete(newGrid):
-            # print("level complete !")
+            print("level complete !")
             reward = 11
         elif self.levelIsLost(newGrid):
-            # print("level lost !")
+            print("level lost !")
             reward = -11
         hasMoved = self.grid != newGrid
         if hasMoved:
             self.grid = newGrid
-            pygame.time.delay(100)
+            # pygame.time.delay(100)
         return reward, (reward==11 or reward==-11)
 
     def paintGrid(self):
@@ -243,13 +243,15 @@ class Sokoban():
         return [(action, state) for action, state in zip(actions, states)]
 
     def getReward(self):
+        reward = 0
         init_goals = len(self.current_level['goals'])
         levelComplete = 0
         left_goals = 0
         for row in self.grid:
             if 2 in row:
                 left_goals += 1
-        return 1 + (init_goals - left_goals)*3
+        reward += (init_goals - left_goals)*3
+        return reward
 
 
 def main():
