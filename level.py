@@ -11,7 +11,8 @@ $ box
 . goal
 * box + goal
 '''
-for level_index, level in enumerate(level_collection):
+level_index = 0
+for level in level_collection:
     level_dict = {
         "player": [],
         "walls": [],
@@ -22,19 +23,21 @@ for level_index, level in enumerate(level_collection):
     }
     level_dict["width"] = int(level.attrib["Width"])
     level_dict["height"] = int(level.attrib["Height"])
-    for line_index, line in enumerate(level):
-        for index, char in enumerate(line.text):
-            match char:
-                case '@':
-                    level_dict["player"].append([index, line_index])
-                case '#':
-                    level_dict["walls"].append([index, line_index])
-                case '$':
-                    level_dict["boxes"].append([index, line_index])
-                case '.':
-                    level_dict["goals"].append([index, line_index])
-                case '*':
-                    level_dict["boxes"].append([index, line_index])
-                    level_dict["goals"].append([index, line_index])
-    with open(f'levels/microban_{level_index}.json', 'w') as outfile:
-        json.dump(level_dict, outfile)
+    if level_dict["width"] == 7 and level_dict["height"] == 7:
+        for line_index, line in enumerate(level):
+            for index, char in enumerate(line.text):
+                match char:
+                    case '@':
+                        level_dict["player"].append([index, line_index])
+                    case '#':
+                        level_dict["walls"].append([index, line_index])
+                    case '$':
+                        level_dict["boxes"].append([index, line_index])
+                    case '.':
+                        level_dict["goals"].append([index, line_index])
+                    case '*':
+                        level_dict["boxes"].append([index, line_index])
+                        level_dict["goals"].append([index, line_index])
+        with open(f'levels/microban_{level_index}.json', 'w') as outfile:
+            json.dump(level_dict, outfile)
+        level_index += 1
