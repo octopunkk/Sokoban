@@ -1,6 +1,7 @@
 import json
 import pygame
 import copy
+from math import dist
 
 """
 Lvl 0 :
@@ -241,6 +242,21 @@ class Sokoban():
         for action in actions:
             states.append(self.computeState(self.calculateGrid(action)))
         return [(action, state) for action, state in zip(actions, states)]
+    
+    def boxNearGoal(self):
+        boxs = []
+        platforms = []
+        for xindex, row in enumerate(self.grid):
+            for yindex, case in enumerate(row):
+                if case == 1:
+                    boxs.append(xindex, yindex)
+                if case == 2:
+                    platforms.append(xindex, yindex)
+        distances = []
+        for box_coords in boxs:
+            for platform_coords in platforms:
+                distances.append(dist(box_coords, platform_coords))
+        print(distances)
 
     def getReward(self):
         reward = 0
@@ -251,6 +267,7 @@ class Sokoban():
             if 2 in row:
                 left_goals += 1
         reward += (init_goals - left_goals)*3
+        self.boxNearGoal()
         return reward
 
 
