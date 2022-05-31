@@ -14,7 +14,7 @@ class Agent:
     def __init__(
         self,
         input_size=4,
-        epsilon=0.7,
+        epsilon=0.8,
         decay=0.9995,
         gamma=0.95,
         loss_fct="mse",
@@ -49,7 +49,6 @@ class Agent:
         # build the neural network
         self.model = Sequential()
         self.model.add(Dense(64, activation="relu", input_shape=(input_size,)))
-        self.model.add(Dense(128, activation="relu"))
         self.model.add(Dense(128, activation="relu"))
         self.model.add(Dense(64, activation="relu"))
         self.model.add(Dense(32, activation="relu"))

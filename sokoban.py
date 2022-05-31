@@ -191,18 +191,18 @@ class Sokoban():
         newGrid = self.calculateGrid(key)
         if newGrid is None:
             return 0, False
-        reward = self.getReward()
+        reward = self.getReward(newGrid)
         if self.levelIsComplete(newGrid):
             print("level complete !")
-            reward = 11
+            reward = 100
         elif self.levelIsLost(newGrid):
             print("level lost !")
-            reward = -11
+            reward = -100
         hasMoved = self.grid != newGrid
         if hasMoved:
             self.grid = newGrid
             # pygame.time.delay(100)
-        return reward, (reward==11 or reward==-11)
+        return reward, (reward==100 or reward==-100)
 
     def paintGrid(self):
         for rowIndex, row in enumerate(self.grid):
@@ -263,33 +263,47 @@ class Sokoban():
         boxs = []
         platforms = []
         for xindex, row in enumerate(self.grid):
-            for yindex, case in enumerate(row):
-                if case == 1:
-                    boxs.append(xindex, yindex)
-                if case == 2:
-                    platforms.append(xindex, yindex)
+            for yindex, square in enumerate(row):
+                match square:
+                    case 1:
+                        boxs.append((xindex, yindex))
+                    case 2:
+                        platforms.append((xindex, yindex))
+                    case 4:
+                        platforms.append((xindex, yindex))
         distances = []
         for box_coords in boxs:
             for platform_coords in platforms:
                 distances.append(dist(box_coords, platform_coords))
-        print(distances)
+        reward = 0
+        for dst in distances:
+            if dst <= 2:
+                reward += 0.5
+            if dst <= 1:
+                reward += 0.5
+        return reward
 
-    def getReward(self):
+    def boxMoved(self):
+
+
+    def getReward(self, newGrid):
         reward = 0
         init_goals = len(self.current_level['goals'])
         levelComplete = 0
         left_goals = 0
-        for row in self.grid:
-            if 2 in row:
+        for row in newGrid:
+            if (2 in row) or (4 in row):
                 left_goals += 1
-        reward += (init_goals - left_goals)*3
-        self.boxNearGoal()
+        moved = self.boxMoved():
+        if not len(moved)
+            reward += self.boxNearGoal()
+            reward += (init_goals - left_goals)*3
         return reward
 
 
 def main():
     run = True
-    game = Sokoban(['levels/microban_0.json', 'levels/microban_1.json'])
+    game = Sokoban(['levels/microban_simple.json'])
     game.nextLevel()
     game.initGrid()
 
@@ -301,9 +315,9 @@ def main():
                 run = False
         keys = pygame.key.get_pressed()
         res = game.updateGrid(keys)
-        if res[0] == -11:
+        if res[0] == -100:
             game.initGrid()
-        elif res[0] == 11:
+        elif res[0] == 100:
             if game.nextLevel():
                 game.initGrid()
             else:

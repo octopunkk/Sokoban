@@ -5,7 +5,7 @@ from tqdm import tqdm
 def training():
     
     # --- Initialisation --- #
-    game = sokoban.Sokoban(['levels/microban_1.json'])
+    game = sokoban.Sokoban(['levels/microban_simple.json'])
     agent = libagent.Agent(input_size=49, decay=0.9995)
     saving_weights_each_steps = 1000
     print("\n >>> Begin Epsilon = " + str(agent.epsilon))
@@ -34,7 +34,8 @@ def training():
 
             # Performs the action
             reward, done = game.updateGrid(action)
-            print(f'done {done}')
+            # print(f'done {done}')
+            print(f'Reward: {reward}')
 
             # Saves the move in memory
             agent.fill_memory(previous_state, actual_state, reward, done)
