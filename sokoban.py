@@ -1,13 +1,5 @@
 import json
-
 import pygame
-
-pygame.init()
-window = pygame.display.set_mode((700, 700))
-pygame.display.set_caption("Sokoban")
-with open("levels/microban_0.json", "r") as f:
-    lvl0 = json.load(f)
-
 
 """
 Lvl 0 :
@@ -53,9 +45,13 @@ class Sokoban():
     grid = []
     current_level = ""
     list_level = []
+    window = None
 
     def __init__(self, list_level) -> None:
         self.list_level = list_level
+        pygame.init()
+        self.window = pygame.display.set_mode((700, 700))
+        pygame.display.set_caption("Sokoban")
 
     def nextLevel(self):
         if len(self.list_level) > 0:
@@ -196,26 +192,26 @@ class Sokoban():
                 rectangle = pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)
                 match column:
                     case 9:
-                        pygame.draw.rect(window, RED, rectangle)
-                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                        pygame.draw.rect(self.window, RED, rectangle)
+                        pygame.draw.rect(self.window, WHITE, rectangle, width=5)
                     case 1:
-                        pygame.draw.rect(window, BLUE, rectangle)
-                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                        pygame.draw.rect(self.window, BLUE, rectangle)
+                        pygame.draw.rect(self.window, WHITE, rectangle, width=5)
                     case 3:
-                        pygame.draw.rect(window, BLACK, rectangle)
-                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                        pygame.draw.rect(self.window, BLACK, rectangle)
+                        pygame.draw.rect(self.window, WHITE, rectangle, width=5)
                     case 2:
-                        pygame.draw.rect(window, GREEN, rectangle)
-                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                        pygame.draw.rect(self.window, GREEN, rectangle)
+                        pygame.draw.rect(self.window, WHITE, rectangle, width=5)
                     case 0:
-                        pygame.draw.rect(window, WHITE, rectangle)
-                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                        pygame.draw.rect(self.window, WHITE, rectangle)
+                        pygame.draw.rect(self.window, WHITE, rectangle, width=5)
                     case 4:
-                        pygame.draw.rect(window, YELLOW, rectangle)
-                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                        pygame.draw.rect(self.window, YELLOW, rectangle)
+                        pygame.draw.rect(self.window, WHITE, rectangle, width=5)
                     case 5:
-                        pygame.draw.rect(window, CYAN, rectangle)
-                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                        pygame.draw.rect(self.window, CYAN, rectangle)
+                        pygame.draw.rect(self.window, WHITE, rectangle, width=5)
 
                 pygame.display.flip()
 
@@ -255,7 +251,7 @@ class Sokoban():
         return 1 + (init_goals - left_goals)*3
 
 
-def main(level):
+def main():
     run = True
     game = Sokoban(['levels/microban_0.json', 'levels/microban_1.json'])
     game.nextLevel()
@@ -280,4 +276,4 @@ def main(level):
 
 
 if __name__ == "__main__":
-    main(lvl0)
+    main()
