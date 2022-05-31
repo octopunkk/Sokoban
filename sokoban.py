@@ -282,8 +282,6 @@ class Sokoban():
                 reward += 0.5
         return reward
 
-    def boxMoved(self):
-
     def boxMoved(self, newGrid):
         list_box_coord = []
         for index_row, row in enumerate(newGrid):
@@ -305,9 +303,9 @@ class Sokoban():
             if (2 in row) or (4 in row):
                 left_goals += 1
         moved = self.boxMoved():
-        if not len(moved)
+        if not len(moved):
             reward += self.boxNearGoal()
-            reward += (init_goals - left_goals)*3
+            reward += (init_goals - left_goals)*10
         return reward
 
 
