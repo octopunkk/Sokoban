@@ -106,8 +106,8 @@ class Sokoban():
         for index_row, row in enumerate(newgrid):
             if 1 in row:
                 index_col = row.index(1)
-                if newgrid[index_row][index_col - 1] in (3, 5) or newgrid[index_row][index_col + 1] in (3, 5):
-                    if newgrid[index_row + 1][index_col] in (3, 5) or newgrid[index_row - 1][index_col] in (3, 5):
+                if newgrid[index_row][index_col - 1] in (3, 5, 1) or newgrid[index_row][index_col + 1] in (3, 5, 1):
+                    if newgrid[index_row + 1][index_col] in (3, 5, 1) or newgrid[index_row - 1][index_col] in (3, 5, 1):
                         levelLost = True
         return levelLost
 
