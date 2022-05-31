@@ -232,23 +232,15 @@ class Sokoban():
         return state
 
     def computeActions(self):
-        all_movements = ["LEFT", "DOWN", "RIGHT", "UP"]
+        all_movements = [0, 1, 2, 3]
         possible_movements = []
         playerCoord = self.getPlayerCoordinates()
-        for index, move in enumerate(all_movements):
+        for move in all_movements:
             destination = self.movementHandler(move, playerCoord)
             if self.pathIsClear(destination):
-                possible_movements.append(index)
+                possible_movements.append(move)
             elif self.boxIsHere(destination):
-                match move:
-                    case "LEFT":
-                        possible_movements.append(4)
-                    case "DOWN":
-                        possible_movements.append(5)
-                    case "RIGHT":
-                        possible_movements.append(6)
-                    case "UP":
-                        possible_movements.append(7)
+                possible_movements.append(move+4)
         return possible_movements
 
     def futurePossibleStates(self):
