@@ -21,16 +21,18 @@ def training():
         done = False
         game.nextLevel()
         game.initGrid()
-        previous_state = game.computeState()
+        previous_state = game.computeState(game.grid)
 
         while not done:
             # fetch all the next possible states.
             possible_future_states = game.futurePossibleStates()
+            print(possible_future_states)
             # the agent then decide the next action
             action, actual_state = agent.act_train(possible_future_states)
 
             # Performs the action
             reward, done = game.updateGrid(action)
+            print(f'done {done}')
 
             # Saves the move in memory
             agent.fill_memory(previous_state, actual_state, reward, done)

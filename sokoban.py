@@ -16,13 +16,13 @@ Lvl 0 :
 #     #
 * @   #
 # # # #
-Player = x
-Box = @
-Goal = *
-Wall = #
+Player = 9
+Box = 1
+Goal = 2
+Wall = 3
 Empty = 0
-player + goal = .
-goal + box = $
+player + goal = 4
+goal + box = 5
 
 
 actions : 
@@ -68,49 +68,49 @@ class Sokoban():
     def initGrid(self):
         self.grid = [[0] * self.current_level["size"] for _ in range(self.current_level["size"])]
         for x, y in self.current_level["walls"]:
-            self.grid[x][y] = "#"
+            self.grid[x][y] = 3
         for x, y in self.current_level["boxes"]:
-            self.grid[x][y] = "@"
+            self.grid[x][y] = 1
         for x, y in self.current_level["goals"]:
-            if self.grid[x][y] == "@":
-                self.grid[x][y] = "$"
+            if self.grid[x][y] == 1:
+                self.grid[x][y] = 5
             else:
-                self.grid[x][y] = "*"
+                self.grid[x][y] = 2
         player_x, player_y = self.current_level["player"]
-        self.grid[player_x][player_y] = "x"
+        self.grid[player_x][player_y] = 9
 
     def getPlayerCoordinates(self):
-        player_pos = [(index, row.index("x")) for index, row in enumerate(self.grid) if 'x' in row]
+        player_pos = [(index, row.index(9)) for index, row in enumerate(self.grid) if 9 in row]
         if player_pos == []:
-            player_pos = [(index, row.index(".")) for index, row in enumerate(self.grid) if '.' in row][0]
+            player_pos = [(index, row.index(4)) for index, row in enumerate(self.grid) if 4 in row][0]
         else:
             player_pos = player_pos[0]
         return player_pos
 
     def pathIsClear(self, destination):
         x, y = destination
-        return self.grid[x][y] == 0 or self.grid[x][y] == "*"
+        return self.grid[x][y] == 0 or self.grid[x][y] == 2
 
     def boxIsHere(self, destination):
         x, y = destination
-        return self.grid[x][y] in ("@", "$")
+        return self.grid[x][y] in (1, 5)
 
     def levelIsComplete(self, newgrid):
         levelComplete = True
         for row in newgrid:
-            if "*" in row:
+            if 2 in row:
                 levelComplete = False
-            elif "." in row:
+            elif 4 in row:
                 levelComplete = False
         return levelComplete
 
     def levelIsLost(self, newgrid):
         levelLost = False
         for index_row, row in enumerate(newgrid):
-            if "@" in row:
-                index_col = row.index("@")
-                if newgrid[index_row][index_col - 1] in ("#", "$") or newgrid[index_row][index_col + 1] in ("#", "$"):
-                    if newgrid[index_row + 1][index_col] in ("#", "$") or newgrid[index_row - 1][index_col] in ("#", "$"):
+            if 1 in row:
+                index_col = row.index(1)
+                if newgrid[index_row][index_col - 1] in (3, 5) or newgrid[index_row][index_col + 1] in (3, 5):
+                    if newgrid[index_row + 1][index_col] in (3, 5) or newgrid[index_row - 1][index_col] in (3, 5):
                         levelLost = True
         return levelLost
 
@@ -146,41 +146,41 @@ class Sokoban():
             return
 
         if self.pathIsClear(destination):
-            if self.grid[playerCoord[0]][playerCoord[1]] == ".":
-                newGrid[playerCoord[0]][playerCoord[1]] = "*"
+            if self.grid[playerCoord[0]][playerCoord[1]] == 4:
+                newGrid[playerCoord[0]][playerCoord[1]] = 2
             else:
                 newGrid[playerCoord[0]][playerCoord[1]] = 0
-            if self.grid[destination[0]][destination[1]] == "*":
-                newGrid[destination[0]][destination[1]] = "."
+            if self.grid[destination[0]][destination[1]] == 2:
+                newGrid[destination[0]][destination[1]] = 4
             else:
-                newGrid[destination[0]][destination[1]] = "x"
+                newGrid[destination[0]][destination[1]] = 9
         elif self.boxIsHere(destination):
             boxDestination = self.movementHandler(key, destination)
             if self.pathIsClear(boxDestination):
-                if self.grid[playerCoord[0]][playerCoord[1]] == ".":
-                    newGrid[playerCoord[0]][playerCoord[1]] = "*"
+                if self.grid[playerCoord[0]][playerCoord[1]] == 4:
+                    newGrid[playerCoord[0]][playerCoord[1]] = 2
                 else:
                     newGrid[playerCoord[0]][playerCoord[1]] = 0
 
-                if self.grid[destination[0]][destination[1]] == "$":
-                    newGrid[destination[0]][destination[1]] = "."
+                if self.grid[destination[0]][destination[1]] == 5:
+                    newGrid[destination[0]][destination[1]] = 4
                 else:
-                    newGrid[destination[0]][destination[1]] = "x"
+                    newGrid[destination[0]][destination[1]] = 9
 
-                if self.grid[boxDestination[0]][boxDestination[1]] == "*":
-                    newGrid[boxDestination[0]][boxDestination[1]] = "$"
+                if self.grid[boxDestination[0]][boxDestination[1]] == 2:
+                    newGrid[boxDestination[0]][boxDestination[1]] = 5
                 else:
-                    newGrid[boxDestination[0]][boxDestination[1]] = "@"
+                    newGrid[boxDestination[0]][boxDestination[1]] = 1
         return newGrid
 
     def updateGrid(self, key):
         newGrid = self.calculateGrid(key)
         reward = self.getReward()
         if self.levelIsComplete(newGrid):
-            print("level complete !")
+            # print("level complete !")
             reward = 11
         elif self.levelIsLost(newGrid):
-            print("level lost !")
+            # print("level lost !")
             reward = -11
         hasMoved = self.grid == newGrid
         if hasMoved:
@@ -193,31 +193,31 @@ class Sokoban():
             for columnIndex, column in enumerate(row):
                 rectangle = pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)
                 match column:
-                    case "x":
+                    case 9:
                         pygame.draw.rect(window, RED, rectangle)
                         pygame.draw.rect(window, WHITE, rectangle, width=5)
-                    case "@":
+                    case 1:
                         pygame.draw.rect(window, BLUE, rectangle)
                         pygame.draw.rect(window, WHITE, rectangle, width=5)
-                    case "#":
+                    case 3:
                         pygame.draw.rect(window, BLACK, rectangle)
                         pygame.draw.rect(window, WHITE, rectangle, width=5)
-                    case "*":
+                    case 2:
                         pygame.draw.rect(window, GREEN, rectangle)
                         pygame.draw.rect(window, WHITE, rectangle, width=5)
                     case 0:
                         pygame.draw.rect(window, WHITE, rectangle)
                         pygame.draw.rect(window, WHITE, rectangle, width=5)
-                    case ".":
+                    case 4:
                         pygame.draw.rect(window, YELLOW, rectangle)
                         pygame.draw.rect(window, WHITE, rectangle, width=5)
-                    case "$":
+                    case 5:
                         pygame.draw.rect(window, CYAN, rectangle)
                         pygame.draw.rect(window, WHITE, rectangle, width=5)
 
                 pygame.display.flip()
 
-    def computeState(self):
+    def computeState(self, grid):
         state = []
         for row in self.grid:
             state += row
@@ -237,7 +237,7 @@ class Sokoban():
 
     def futurePossibleStates(self):
         actions = self.computeActions()
-        start_state = self.computeState()
+        start_state = self.computeState(self.grid)
         states = []
         for action in actions:
             states.append(self.computeState(self.calculateGrid(action)))
@@ -248,7 +248,7 @@ class Sokoban():
         levelComplete = 0
         left_goals = 0
         for row in self.grid:
-            if "*" in row:
+            if 2 in row:
                 left_goals += 1
         return 1 + (init_goals - left_goals)*3
 
