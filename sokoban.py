@@ -117,7 +117,8 @@ class Sokoban():
     def movementHandler(self, keys, coordinates):
         x, y = coordinates
         destination = "Invalid movement !"
-        if (type(keys) == list):
+        print(type(keys))
+        if (type(keys) == pygame.key.ScancodeWrapper):
             if keys[pygame.K_LEFT]:
                 destination = [x, y - 1]
             elif keys[pygame.K_RIGHT]:
