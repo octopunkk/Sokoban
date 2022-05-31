@@ -91,6 +91,16 @@ class Sokoban():
                 levelComplete = False
         return levelComplete
 
+    def levelIsLost(self, newgrid):
+        levelLost = False
+        for index_row, row in enumerate(newgrid):
+            if "@" in row:
+                index_col = row.index("@")
+                if newgrid[index_row][index_col - 1] == "#" or newgrid[index_row][index_col + 1] == "#":
+                    if newgrid[index_row + 1][index_col] == "#" or newgrid[index_row - 1][index_col] == "#":
+                        levelLost = True
+        return levelLost
+
     def movementHandler(self, keys, coordinates):
         x, y = coordinates
         destination = "Invalid movement !"
@@ -139,6 +149,8 @@ class Sokoban():
                     newGrid[boxDestination[0]][boxDestination[1]] = "@"
         if self.levelIsComplete(newGrid):
             print("level complete !")
+        elif self.levelIsLost(newGrid):
+            print("level lost !")
         hasMoved = self.grid == newGrid
         if hasMoved:
             self.grid = newGrid
