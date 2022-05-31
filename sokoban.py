@@ -276,7 +276,7 @@ class Sokoban():
                 distances.append(dist(box_coords, platform_coords))
         reward = 0
         for dst in distances:
-            reward += 3 - dst
+            reward += (1 - dst)*5
         return reward
 
     def boxMoved(self, newGrid):
