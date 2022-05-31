@@ -36,7 +36,7 @@ push_box_right: 6
 push_box_up:    7
 """
 
-int_to_input = {0:"LEFT", 1:"DOWN", 2:"RIGHT", 3:"UP", 4:"LEFT", 5:"DOWN", 6:"RIGHT", 7:"UP",}
+int_to_input = {0: "LEFT", 1: "DOWN", 2: "RIGHT", 3: "UP", 4: "LEFT", 5: "DOWN", 6: "RIGHT", 7: "UP"}
 
 
 RED = (255, 0, 0)  # Player
@@ -49,228 +49,217 @@ YELLOW = (255, 255, 0)  # Player + Goal
 BLOCKSIZE = 100
 
 
-def initGrid(level):
-    grid = [[0] * level["size"] for _ in range(level["size"])]
-    for x, y in level["walls"]:
-        grid[x][y] = "#"
-    for x, y in level["boxes"]:
-        grid[x][y] = "@"
-    for x, y in level["goals"]:
-        if grid[x][y] == "@":
-            grid[x][y] = "$"
+class Sokoban():
+    grid = []
+
+    def initGrid(self, level):
+        self.grid = [[0] * level["size"] for _ in range(level["size"])]
+        for x, y in level["walls"]:
+            self.grid[x][y] = "#"
+        for x, y in level["boxes"]:
+            self.grid[x][y] = "@"
+        for x, y in level["goals"]:
+            if self.grid[x][y] == "@":
+                self.grid[x][y] = "$"
+            else:
+                self.grid[x][y] = "*"
+        player_x, player_y = level["player"]
+        self.grid[player_x][player_y] = "x"
+
+    def getPlayerCoordinates(self):
+        player_pos = [(index, row.index("x")) for index, row in enumerate(self.grid) if 'x' in row]
+        if player_pos == []:
+            player_pos = [(index, row.index(".")) for index, row in enumerate(self.grid) if '.' in row][0]
         else:
-            grid[x][y] = "*"
-    player_x, player_y = level["player"]
-    grid[player_x][player_y] = "x"
-    return grid
+            player_pos = player_pos[0]
+        return player_pos
 
+    def pathIsClear(self, destination):
+        x, y = destination
+        return self.grid[x][y] == 0 or self.grid[x][y] == "*"
 
-def getPlayerCoordinates(grid):
-    player_pos = [(index, row.index("x")) for index, row in enumerate(grid) if 'x' in row]
-    if player_pos == []:
-        player_pos = [(index, row.index(".")) for index, row in enumerate(grid) if '.' in row][0]
-    else:
-        player_pos = player_pos[0]
-    return player_pos
+    def boxIsHere(self, destination):
+        x, y = destination
+        return self.grid[x][y] in ("@", "$")
 
+    def levelIsComplete(self, newgrid):
+        levelComplete = True
+        for row in newgrid:
+            if "*" in row:
+                levelComplete = False
+        return levelComplete
 
-def pathIsClear(grid, destination):
-    x, y = destination
-    return grid[x][y] == 0 or grid[x][y] == "*"
+    def movementHandler(self, movement, coordinates):
+        x, y = coordinates
+        match movement:
+            case "UP":
+                destination = [x - 1, y]
+            case "DOWN":
+                destination = [x + 1, y]
+            case "LEFT":
+                destination = [x, y - 1]
+            case "RIGHT":
+                destination = [x, y + 1]
+            case _:
+                destination = "Invalid movement !"
+        return destination
 
+    def updateGrid(self, movement):
+        newGrid = self.grid
+        playerCoord = self.getPlayerCoordinates()
+        destination = self.movementHandler(movement, playerCoord)
 
-def boxIsHere(grid, destination):
-    x, y = destination
-    return grid[x][y] in ("@", "$")
-
-
-def levelIsComplete(grid):
-    levelComplete = True
-    for row in grid:
-        if "*" in row:
-            levelComplete = False
-    return levelComplete
-
-
-def movementHandler(movement, coordinates):
-    x, y = coordinates
-    match movement:
-        case "UP":
-            destination = [x - 1, y]
-        case "DOWN":
-            destination = [x + 1, y]
-        case "LEFT":
-            destination = [x, y - 1]
-        case "RIGHT":
-            destination = [x, y + 1]
-        case _:
-            destination = "Invalid movement !"
-    return destination
-
-
-def updateGrid(grid, movement):
-    newGrid = grid
-    playerCoord = getPlayerCoordinates(grid)
-    destination = movementHandler(movement, playerCoord)
-
-    if pathIsClear(grid, destination):
-        if grid[playerCoord[0]][playerCoord[1]] == ".":
-            newGrid[playerCoord[0]][playerCoord[1]] = "*"
-        else:
-            newGrid[playerCoord[0]][playerCoord[1]] = 0
-        if grid[destination[0]][destination[1]] == "*":
-            newGrid[destination[0]][destination[1]] = "."
-        else:
-            newGrid[destination[0]][destination[1]] = "x"
-        return newGrid
-    elif boxIsHere(grid, destination):
-        boxDestination = movementHandler(movement, destination)
-        if pathIsClear(grid, boxDestination):
-            if grid[playerCoord[0]][playerCoord[1]] == ".":
+        if self.pathIsClear(destination):
+            if self.grid[playerCoord[0]][playerCoord[1]] == ".":
                 newGrid[playerCoord[0]][playerCoord[1]] = "*"
             else:
                 newGrid[playerCoord[0]][playerCoord[1]] = 0
-
-            if grid[destination[0]][destination[1]] == "$":
+            if self.grid[destination[0]][destination[1]] == "*":
                 newGrid[destination[0]][destination[1]] = "."
             else:
                 newGrid[destination[0]][destination[1]] = "x"
-
-            if grid[boxDestination[0]][boxDestination[1]] == "*":
-                newGrid[boxDestination[0]][boxDestination[1]] = "$"
-            else:
-                newGrid[boxDestination[0]][boxDestination[1]] = "@"
             return newGrid
-    if levelIsComplete(newGrid):
-        print("level complete !")
-    return grid
+        elif self.boxIsHere(destination):
+            boxDestination = self.movementHandler(movement, destination)
+            if self.pathIsClear(boxDestination):
+                if self.grid[playerCoord[0]][playerCoord[1]] == ".":
+                    newGrid[playerCoord[0]][playerCoord[1]] = "*"
+                else:
+                    newGrid[playerCoord[0]][playerCoord[1]] = 0
 
+                if self.grid[destination[0]][destination[1]] == "$":
+                    newGrid[destination[0]][destination[1]] = "."
+                else:
+                    newGrid[destination[0]][destination[1]] = "x"
 
-def paintGrid(grid):
-    for rowIndex, row in enumerate(grid):
-        for columnIndex, column in enumerate(row):
-            rectangle = pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)
-            match column:
-                case "x":
-                    pygame.draw.rect(window, RED, rectangle)
-                    pygame.draw.rect(window, WHITE, rectangle, width=5)
-                case "@":
-                    pygame.draw.rect(window, BLUE, rectangle)
-                    pygame.draw.rect(window, WHITE, rectangle, width=5)
-                case "#":
-                    pygame.draw.rect(window, BLACK, rectangle)
-                    pygame.draw.rect(window, WHITE, rectangle, width=5)
-                case "*":
-                    pygame.draw.rect(window, GREEN, rectangle)
-                    pygame.draw.rect(window, WHITE, rectangle, width=5)
-                case 0:
-                    pygame.draw.rect(window, WHITE, rectangle)
-                    pygame.draw.rect(window, WHITE, rectangle, width=5)
-                case ".":
-                    pygame.draw.rect(window, YELLOW, rectangle)
-                    pygame.draw.rect(window, WHITE, rectangle, width=5)
-                case "$":
-                    pygame.draw.rect(window, CYAN, rectangle)
-                    pygame.draw.rect(window, WHITE, rectangle, width=5)
+                if self.grid[boxDestination[0]][boxDestination[1]] == "*":
+                    newGrid[boxDestination[0]][boxDestination[1]] = "$"
+                else:
+                    newGrid[boxDestination[0]][boxDestination[1]] = "@"
+                return newGrid
+        if self.levelIsComplete(newGrid):
+            print("level complete !")
+        return newGrid
 
-            pygame.display.flip()
+    def paintGrid(self):
+        for rowIndex, row in enumerate(self.grid):
+            for columnIndex, column in enumerate(row):
+                rectangle = pygame.Rect(columnIndex * BLOCKSIZE, rowIndex * BLOCKSIZE, BLOCKSIZE, BLOCKSIZE)
+                match column:
+                    case "x":
+                        pygame.draw.rect(window, RED, rectangle)
+                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                    case "@":
+                        pygame.draw.rect(window, BLUE, rectangle)
+                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                    case "#":
+                        pygame.draw.rect(window, BLACK, rectangle)
+                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                    case "*":
+                        pygame.draw.rect(window, GREEN, rectangle)
+                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                    case 0:
+                        pygame.draw.rect(window, WHITE, rectangle)
+                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                    case ".":
+                        pygame.draw.rect(window, YELLOW, rectangle)
+                        pygame.draw.rect(window, WHITE, rectangle, width=5)
+                    case "$":
+                        pygame.draw.rect(window, CYAN, rectangle)
+                        pygame.draw.rect(window, WHITE, rectangle, width=5)
 
+                pygame.display.flip()
 
-def gameStep(grid, keys, hasMoved):
-    if keys[pygame.K_LEFT]:
-        grid = updateGrid(grid, "LEFT")
-        hasMoved = True
-    elif keys[pygame.K_RIGHT]:
-        grid = updateGrid(grid, "RIGHT")
-        hasMoved = True
-    elif keys[pygame.K_UP]:
-        grid = updateGrid(grid, "UP")
-        hasMoved = True
-    elif keys[pygame.K_DOWN]:
-        grid = updateGrid(grid, "DOWN")
-        hasMoved = True
-    if hasMoved:
-        pygame.time.delay(100)
-    reward = getReward(grid, lvl0)
-    return grid, hasMoved, reward
+    def gameStep(self, keys, hasMoved):
+        if keys[pygame.K_LEFT]:
+            self.grid = self.updateGrid("LEFT")
+            hasMoved = True
+        elif keys[pygame.K_RIGHT]:
+            self.grid = self.updateGrid("RIGHT")
+            hasMoved = True
+        elif keys[pygame.K_UP]:
+            self.grid = self.updateGrid("UP")
+            hasMoved = True
+        elif keys[pygame.K_DOWN]:
+            self.grid = self.updateGrid("DOWN")
+            hasMoved = True
+        if hasMoved:
+            pygame.time.delay(100)
+        reward = self.getReward(lvl0)
+        return hasMoved, reward
 
+    def simulateStep(self, key):
+        match key:
+            case "LEFT":
+                self.grid = self.updateGrid("LEFT")
+            case "DOWN":
+                self.grid = self.updateGrid("DOWN")
+            case "RIGHT":
+                self.grid = self.updateGrid("RIGHT")
+            case "UP":
+                self.grid = self.updateGrid("UP")
 
-def simulateStep(grid, key):
-    match key:
-        case "LEFT":
-            grid = updateGrid(grid, "LEFT")
-        case "DOWN":
-            grid = updateGrid(grid, "DOWN")
-        case "RIGHT":
-            grid = updateGrid(grid, "RIGHT")
-        case "UP":
-            grid = updateGrid(grid, "UP")
-    return grid
+    def computeState(self):
+        state = []
+        for row in self.grid:
+            state += row
+        return state
 
+    def computeActions(self):
+        all_movements = ["LEFT", "DOWN", "RIGHT", "UP"]
+        possible_movements = []
+        playerCoord = self.getPlayerCoordinates()
+        for index, move in enumerate(all_movements):
+            destination = self.movementHandler(move, playerCoord)
+            if self.pathIsClear(destination):
+                possible_movements.append(index)
+            elif self.boxIsHere(destination):
+                match move:
+                    case "LEFT":
+                        possible_movements.append(4)
+                    case "DOWN":
+                        possible_movements.append(5)
+                    case "RIGHT":
+                        possible_movements.append(6)
+                    case "UP":
+                        possible_movements.append(7)
+        return possible_movements
 
-def computeState(grid):
-    state = []
-    for row in grid:
-        state += row
-    return state
+    def futurePossibleStates(self):
+        actions = self.computeActions()
+        start_state = self.computeState()
+        states = []
+        for action in actions:
+            states.append(self.computeState(self.simulateStep(action)))
+        return [(action, state) for action, state in zip(actions, states)]
 
-
-def computeActions(grid):
-    all_movements = ["LEFT", "DOWN", "RIGHT", "UP"]
-    possible_movements = []
-    playerCoord = getPlayerCoordinates(grid)
-    for index, move in enumerate(all_movements):
-        destination = movementHandler(move, playerCoord)
-        if pathIsClear(grid, destination):
-            possible_movements.append(index)
-        elif boxIsHere(grid, destination):
-            match move:
-                case "LEFT":
-                    possible_movements.append(4)
-                case "DOWN":
-                    possible_movements.append(5)
-                case "RIGHT":
-                    possible_movements.append(6)
-                case "UP":
-                    possible_movements.append(7)
-    return possible_movements
-
-
-def futurePossibleStates(grid):
-    actions = computeActions(grid)
-    start_state = computeState(grid)
-    states = []
-    for action in actions:
-        states.append(computeState(simulateStep(grid, action)))
-    return [(action, state) for action, state in zip(actions, states)]
-
-
-def getReward(grid, current_board):
-    init_goals = len(current_board['goals'])
-    levelComplete = 0
-    left_goals = 0
-    for row in grid:
-        if "*" in row:
-            left_goals += 1
-    if left_goals == 0:
-        levelComplete = 1
-    return 1 + levelComplete*10 + (init_goals - left_goals)*5
+    def getReward(self, current_board):
+        init_goals = len(current_board['goals'])
+        levelComplete = 0
+        left_goals = 0
+        for row in self.grid:
+            if "*" in row:
+                left_goals += 1
+        if left_goals == 0:
+            levelComplete = 1
+        return 1 + levelComplete*10 + (init_goals - left_goals)*5
 
 
 def main(level):
     run = True
-    grid = initGrid(level)
+    game = Sokoban()
+    game.initGrid(level)
 
     while run:
         pygame.time.delay(10)
         hasMoved = False
-        paintGrid(grid)
+        game.paintGrid()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
         keys = pygame.key.get_pressed()
-        grid, hasMoved, _ = gameStep(grid, keys, hasMoved)
-        paintGrid(grid)
+        hasMoved, _ = game.gameStep(keys, hasMoved)
+        game.paintGrid()
 
 
 if __name__ == "__main__":
