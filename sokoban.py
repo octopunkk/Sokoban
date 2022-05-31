@@ -276,10 +276,7 @@ class Sokoban():
                 distances.append(dist(box_coords, platform_coords))
         reward = 0
         for dst in distances:
-            if dst <= 2:
-                reward += 0.5
-            if dst <= 1:
-                reward += 0.5
+            reward += 3 - dst
         return reward
 
     def boxMoved(self, newGrid):
@@ -294,7 +291,7 @@ class Sokoban():
                         list_box_coord.append([index_row, index_col])
         return list_box_coord
 
-    def getReward(self):
+    def getReward(self, newGrid):
         reward = 0
         init_goals = len(self.current_level['goals'])
         levelComplete = 0
@@ -302,8 +299,9 @@ class Sokoban():
         for row in newGrid:
             if (2 in row) or (4 in row):
                 left_goals += 1
-        moved = self.boxMoved():
-        if not len(moved):
+        moved = self.boxMoved(newGrid)
+        print(moved)
+        if len(moved) != 0:
             reward += self.boxNearGoal()
             reward += (init_goals - left_goals)*10
         return reward
