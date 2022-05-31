@@ -58,8 +58,12 @@ class Sokoban():
         self.list_level = list_level
 
     def nextLevel(self):
-        with open(self.list_level.pop(), "r") as f:
-            self.current_level = json.load(f)
+        if len(self.list_level) > 0:
+            with open(self.list_level.pop(), "r") as f:
+                self.current_level = json.load(f)
+            return True
+        else:
+            return False
 
     def initGrid(self):
         self.grid = [[0] * self.current_level["size"] for _ in range(self.current_level["size"])]
@@ -156,7 +160,7 @@ class Sokoban():
                     newGrid[boxDestination[0]][boxDestination[1]] = "$"
                 else:
                     newGrid[boxDestination[0]][boxDestination[1]] = "@"
-        reward = self.getReward(lvl0)
+        reward = self.getReward()
         if self.levelIsComplete(newGrid):
             print("level complete !")
             reward = 10
@@ -243,8 +247,8 @@ class Sokoban():
             states.append(self.computeState(self.simulateStep(action)))
         return [(action, state) for action, state in zip(actions, states)]
 
-    def getReward(self, current_board):
-        init_goals = len(current_board['goals'])
+    def getReward(self):
+        init_goals = len(self.current_level['goals'])
         levelComplete = 0
         left_goals = 0
         for row in self.grid:
@@ -272,8 +276,10 @@ def main(level):
         if res == -10:
             game.initGrid()
         elif res == 10:
-            game.nextLevel()
-            game.initGrid()
+            if game.nextLevel():
+                game.initGrid()
+            else:
+                break
         game.paintGrid()
 
 
