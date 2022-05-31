@@ -33,7 +33,7 @@ up:             3
 push_box_left:  4
 push_box_down:  5
 push_box_right: 6
-push_box_up:    7 
+push_box_up:    7
 """
 
 int_to_input = {0:"LEFT", 1:"DOWN", 2:"RIGHT", 3:"UP", 4:"LEFT", 5:"DOWN", 6:"RIGHT", 7:"UP",}
@@ -44,7 +44,8 @@ GREEN = (0, 255, 0)  # Goal
 BLUE = (0, 0, 255)  # Box
 WHITE = (255, 255, 255)  # Empty
 BLACK = (0, 0, 0)  # Wall
-PURPLE = (128, 0, 128)
+CYAN = (0, 128, 128)  # Box + goal
+YELLOW = (255, 255, 0)  # Player + Goal
 BLOCKSIZE = 100
 
 
@@ -166,10 +167,10 @@ def paintGrid(grid):
                     pygame.draw.rect(window, WHITE, rectangle)
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
                 case ".":
-                    pygame.draw.rect(window, RED, rectangle)
+                    pygame.draw.rect(window, YELLOW, rectangle)
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
                 case "$":
-                    pygame.draw.rect(window, PURPLE, rectangle)
+                    pygame.draw.rect(window, CYAN, rectangle)
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
 
             pygame.display.flip()
