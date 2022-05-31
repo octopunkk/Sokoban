@@ -3,9 +3,9 @@ import json
 import pygame
 
 pygame.init()
-window = pygame.display.set_mode((500, 500))
+window = pygame.display.set_mode((700, 700))
 pygame.display.set_caption("Sokoban")
-with open("level0.json", "r") as f:
+with open("levels/microban_0.json", "r") as f:
     lvl0 = json.load(f)
 
 
@@ -21,6 +21,7 @@ Box = @
 Goal = *
 Wall = #
 Empty = 0
+player + goal = .
 
 
 actions : 
@@ -59,7 +60,12 @@ def initGrid(level):
 
 
 def getPlayerCoordinates(grid):
-    return [(index, row.index("x")) for index, row in enumerate(grid) if 'x' in row][0]
+    player_pos = [(index, row.index("x")) for index, row in enumerate(grid) if 'x' in row]
+    if player_pos == []:
+        player_pos = [(index, row.index(".")) for index, row in enumerate(grid) if '.' in row][0]
+    else:
+        player_pos = player_pos[0]
+    return player_pos
 
 
 def pathIsClear(grid, destination):
@@ -102,8 +108,14 @@ def updateGrid(grid, movement):
     destination = movementHandler(movement, playerCoord)
 
     if pathIsClear(grid, destination):
-        newGrid[playerCoord[0]][playerCoord[1]] = 0
-        newGrid[destination[0]][destination[1]] = "x"
+        if grid[playerCoord[0]][playerCoord[1]] == ".":
+            newGrid[playerCoord[0]][playerCoord[1]] = "*"
+        else:
+            newGrid[playerCoord[0]][playerCoord[1]] = 0
+        if grid[destination[0]][destination[1]] == "*":
+            newGrid[destination[0]][destination[1]] = "."
+        else:
+            newGrid[destination[0]][destination[1]] = "x"
         return newGrid
     elif boxIsHere(grid, destination):
         boxDestination = movementHandler(movement, destination)
@@ -136,6 +148,9 @@ def paintGrid(grid):
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
                 case 0:
                     pygame.draw.rect(window, WHITE, rectangle)
+                    pygame.draw.rect(window, WHITE, rectangle, width=5)
+                case ".":
+                    pygame.draw.rect(window, RED, rectangle)
                     pygame.draw.rect(window, WHITE, rectangle, width=5)
 
             pygame.display.flip()

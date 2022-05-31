@@ -18,17 +18,15 @@ for level in level_collection:
         "walls": [],
         "boxes": [],
         "goals": [],
-        "width": 0,
-        "height": 0
+        "size": 0
     }
-    level_dict["width"] = int(level.attrib["Width"])
-    level_dict["height"] = int(level.attrib["Height"])
-    if level_dict["width"] == 7 and level_dict["height"] == 7:
+    if int(level.attrib["Width"]) == 7 and int(level.attrib["Height"]) == 7:
+        level_dict["size"] = int(level.attrib["Width"])
         for line_index, line in enumerate(level):
             for index, char in enumerate(line.text):
                 match char:
                     case '@':
-                        level_dict["player"].append([index, line_index])
+                        level_dict["player"] = [index, line_index]
                     case '#':
                         level_dict["walls"].append([index, line_index])
                     case '$':
