@@ -1,5 +1,6 @@
 import json
 import pygame
+import copy
 
 """
 Lvl 0 :
@@ -135,7 +136,7 @@ class Sokoban():
         return destination
 
     def calculateGrid(self, key):
-        newGrid = self.grid
+        newGrid = copy.deepcopy(self.grid)
         playerCoord = self.getPlayerCoordinates()
         destination = self.movementHandler(key, playerCoord)
         if destination == "Invalid movement !":
@@ -180,7 +181,7 @@ class Sokoban():
         elif self.levelIsLost(newGrid):
             # print("level lost !")
             reward = -11
-        hasMoved = self.grid == newGrid
+        hasMoved = self.grid != newGrid
         if hasMoved:
             self.grid = newGrid
             pygame.time.delay(100)
@@ -217,7 +218,7 @@ class Sokoban():
 
     def computeState(self, grid):
         state = []
-        for row in self.grid:
+        for row in grid:
             state += row
         return state
 
