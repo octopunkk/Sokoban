@@ -117,14 +117,25 @@ class Sokoban():
     def movementHandler(self, keys, coordinates):
         x, y = coordinates
         destination = "Invalid movement !"
-        if keys[pygame.K_LEFT]:
-            destination = [x, y - 1]
-        elif keys[pygame.K_RIGHT]:
-            destination = [x, y + 1]
-        elif keys[pygame.K_UP]:
-            destination = [x - 1, y]
-        elif keys[pygame.K_DOWN]:
-            destination = [x + 1, y]
+        if (type(keys) == list):
+            if keys[pygame.K_LEFT]:
+                destination = [x, y - 1]
+            elif keys[pygame.K_RIGHT]:
+                destination = [x, y + 1]
+            elif keys[pygame.K_UP]:
+                destination = [x - 1, y]
+            elif keys[pygame.K_DOWN]:
+                destination = [x + 1, y]
+        elif (type(keys) == int):
+            match int_to_input[keys]:
+                case "LEFT":
+                    destination = [x, y - 1]
+                case "RIGHT":
+                    destination = [x, y + 1]
+                case "UP":
+                    destination = [x - 1, y]
+                case "DOWN":
+                    destination = [x + 1, y]
         return destination
 
     def updateGrid(self, keys):
