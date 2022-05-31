@@ -105,8 +105,8 @@ class Sokoban():
         for index_row, row in enumerate(newgrid):
             if "@" in row:
                 index_col = row.index("@")
-                if newgrid[index_row][index_col - 1] == "#" or newgrid[index_row][index_col + 1] == "#":
-                    if newgrid[index_row + 1][index_col] == "#" or newgrid[index_row - 1][index_col] == "#":
+                if newgrid[index_row][index_col - 1] in ("#", "$") or newgrid[index_row][index_col + 1] in ("#", "$"):
+                    if newgrid[index_row + 1][index_col] in ("#", "$") or newgrid[index_row - 1][index_col] in ("#", "$"):
                         levelLost = True
         return levelLost
 
