@@ -103,12 +103,28 @@ class Sokoban():
 
     def levelIsLost(self, newgrid):
         levelLost = False
+        lost_cube = 0
         for index_row, row in enumerate(newgrid):
             if 1 in row:
                 index_col = row.index(1)
-                if newgrid[index_row][index_col - 1] in (3, 5, 1) or newgrid[index_row][index_col + 1] in (3, 5, 1):
-                    if newgrid[index_row + 1][index_col] in (3, 5, 1) or newgrid[index_row - 1][index_col] in (3, 5, 1):
+                if newgrid[index_row][index_col - 1] == 3 or newgrid[index_row][index_col + 1] == 3:
+                    if newgrid[index_row + 1][index_col] == 3 or newgrid[index_row - 1][index_col] == 3:
                         levelLost = True
+                    if newgrid[index_row + 1][index_col] in (1, 5) or newgrid[index_row - 1][index_col] in (1, 5):
+                        lost_cube += 1
+                if newgrid[index_row][index_col - 1] in (1, 5) or newgrid[index_row][index_col + 1] in (1, 5):
+                    if newgrid[index_row + 1][index_col] in (1, 5, 3) or newgrid[index_row - 1][index_col] in (1, 5, 3):
+                        lost_cube += 1
+            if 5 in row:
+                index_col = row.index(5)
+                if newgrid[index_row][index_col - 1] == 3 or newgrid[index_row][index_col + 1] == 3:
+                    if newgrid[index_row + 1][index_col] in (1, 5) or newgrid[index_row - 1][index_col] in (1, 5):
+                        lost_cube += 1
+                if newgrid[index_row][index_col - 1] in (1, 5) or newgrid[index_row][index_col + 1] in (1, 5):
+                    if newgrid[index_row + 1][index_col] in (1, 5, 3) or newgrid[index_row - 1][index_col] in (1, 5, 3):
+                        lost_cube += 1
+        if lost_cube == len(self.current_level["boxes"]):
+            levelLost = True
         return levelLost
 
     def movementHandler(self, keys, coordinates):
@@ -268,9 +284,9 @@ def main():
                 run = False
         keys = pygame.key.get_pressed()
         res = game.updateGrid(keys)
-        if res == -11:
+        if res[0] == -11:
             game.initGrid()
-        elif res == 11:
+        elif res[0] == 11:
             if game.nextLevel():
                 game.initGrid()
             else:
