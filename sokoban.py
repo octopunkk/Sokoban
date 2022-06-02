@@ -235,11 +235,50 @@ class Sokoban():
                         pygame.draw.rect(self.window, WHITE, rectangle, width=5)
 
                 pygame.display.flip()
+    
+    def getPlayerCoords(self, newGrid):
+        for xindex, row in enumerate(newGrid):
+            for yindex, block in enumerate(row):
+                if (block == 4) or (block == 9):
+                    return (xindex, yindex)
+    
+    def getGoalCoords(self, newGrid):
+        goal_coords = []
+        for xindex, row in enumerate(newGrid):
+            for yindex, block in enumerate(row):
+                if (block == 4) or (block == 2) or (block == 5):
+                    goal_coords.append((xindex, yindex))
+        return goal_coords
 
+    def computeDistPlayerBox(self, newGrid):
+        box_coords = self.getBoxsCoords(newGrid)
+        player_coords = self.getPlayerCoords(newGrid)
+        dst = []
+        for box in box_coords:
+            dst.append(dist(player_coords, box))
+        return dst
+
+    def computeDistBoxGoal(self, newGrid):
+        box_coords = self.getBoxsCoords(newGrid)
+        goal_coords = self.getGoalCoords(newGrid)
+        dst = []
+        for goal in goal_coords:
+            for box in box_coords:
+                dst.append(dist(goal, box))
+        return dst
+
+    # Board
     def computeState(self, grid):
         state = []
         for row in grid:
             state += row
+        return state
+
+    # Distances
+    def computeStateDist(self, newGrid):
+        state = list(self.getPlayerCoords(newGrid)) 
+        state += self.computeDistPlayerBox(newGrid)
+        state += self.computeDistBoxGoal(newGrid)
         return state
 
     def computeActions(self):
@@ -256,10 +295,10 @@ class Sokoban():
 
     def futurePossibleStates(self):
         actions = self.computeActions()
-        start_state = self.computeState(self.grid)
+        start_state = self.computeStateDist(self.grid)
         states = []
         for action in actions:
-            states.append(self.computeState(self.calculateGrid(action)))
+            states.append(self.computeStateDist(self.calculateGrid(action)))
         return [(action, state) for action, state in zip(actions, states)]
 
     def boxNearGoal(self, boxCoord):
@@ -274,7 +313,7 @@ class Sokoban():
             reward += (2 - dst)*(20/self.count_move)
         return reward*0.5
 
-    def boxMoved(self, newGrid):
+    def getBoxsCoords(self, newGrid):
         list_box_coord = []
         for index_row, row in enumerate(newGrid):
             for index_col, col in enumerate(row):
@@ -284,16 +323,18 @@ class Sokoban():
                     list_box_coord.append([index_row, index_col])
         return list_box_coord
 
-    def getReward(self, newGrid):
-        reward = -1
-        # init_goals = len(self.current_level['goals'])
-        # levelComplete = 0
-        # left_goals = 0
-        # for row in newGrid:
-        #     if (2 in row) or (4 in row):
-        #         left_goals += 1
-        list_old_box_coord = self.boxMoved(self.grid)
-        list_box_coord = self.boxMoved(newGrid)
+    def boxMovedSimple(self, newGrid):
+        reward = 0
+        list_old_box_coord = self.getBoxsCoords(self.grid)
+        list_box_coord = self.getBoxsCoords(newGrid)
+        if list_old_box_coord != list_box_coord:
+            reward += 5
+        return reward
+
+    def boxMoved(self, newGrid):
+        reward = 0
+        list_old_box_coord = self.getBoxsCoords(self.grid)
+        list_box_coord = self.getBoxsCoords(newGrid)
         if list_old_box_coord != list_box_coord:
             for plateform in self.current_level['goals']:
                 for old_box_coord in list_old_box_coord:
@@ -302,9 +343,20 @@ class Sokoban():
                             reward -= 5
                         elif dist(old_box_coord, plateform) > dist(box_coord, plateform):
                             reward += 5
-            # reward += (init_goals - left_goals)*10
         return reward
 
+    def getReward(self, newGrid):
+        reward = -1
+        # init_goals = len(self.current_level['goals'])
+        # levelComplete = 0
+        # left_goals = 0
+        # for row in newGrid:
+        #     if (2 in row) or (4 in row):
+        #         left_goals += 1
+        
+            # reward += (init_goals - left_goals)*10
+        reward += self.boxMovedSimple(newGrid)
+        return reward
 
 def main():
     run = True
@@ -328,7 +380,6 @@ def main():
             else:
                 break
         game.paintGrid()
-
 
 if __name__ == "__main__":
     main()

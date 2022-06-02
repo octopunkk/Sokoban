@@ -50,7 +50,6 @@ class Agent:
         # build the neural network
         self.model = Sequential()
         self.model.add(Dense(64, activation="relu", input_shape=(input_size,)))
-        self.model.add(Dense(128, activation="relu"))
         self.model.add(Dense(64, activation="relu"))
         self.model.add(Dense(32, activation="relu"))
         self.model.add(Dense(1, activation="linear"))
@@ -144,9 +143,9 @@ class Agent:
             return
         list_reward = [x[-2] for x in self.memory]
         # Randomly select a batch of experiences
-        experiences = random.sample(self.memory, batch_size-4)
-        for i in sorted(list_reward, reverse=True)[:4]:
-            experiences.append(self.memory[list_reward.index(i)])
+        experiences = random.sample(self.memory, batch_size)
+        # for i in sorted(list_reward, reverse=True)[:1]:
+        #     experiences.append(self.memory[list_reward.index(i)])
 
         # compute the target for the neural network
         next_states = [experience[1] for experience in experiences]
