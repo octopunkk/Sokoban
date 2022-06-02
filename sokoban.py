@@ -1,5 +1,4 @@
 import json
-from platform import platform
 import pygame
 import copy
 from math import dist
@@ -235,13 +234,13 @@ class Sokoban():
                         pygame.draw.rect(self.window, WHITE, rectangle, width=5)
 
                 pygame.display.flip()
-    
+
     def getPlayerCoords(self, newGrid):
         for xindex, row in enumerate(newGrid):
             for yindex, block in enumerate(row):
                 if (block == 4) or (block == 9):
                     return (xindex, yindex)
-    
+
     def getGoalCoords(self, newGrid):
         goal_coords = []
         for xindex, row in enumerate(newGrid):
@@ -267,6 +266,20 @@ class Sokoban():
                 dst.append(dist(goal, box))
         return dst
 
+    def boxPosPlayer(self, newGrid):
+        box_coords = self.getBoxsCoords(newGrid)[0]
+        player_coords = self.getPlayerCoords(newGrid)
+        if player_coords[0] > box_coords[0] and player_coords[1] == box_coords[1]:
+            return 0
+        elif player_coords[0] < box_coords[0] and player_coords[1] == box_coords[1]:
+            return 1
+        elif player_coords[1] > box_coords[1] and player_coords[0] == box_coords[0]:
+            return 2
+        elif player_coords[1] < box_coords[1] and player_coords[0] == box_coords[0]:
+            return 3
+        else:
+            return 4
+
     # Board
     def computeState(self, grid):
         state = []
@@ -276,7 +289,8 @@ class Sokoban():
 
     # Distances
     def computeStateDist(self, newGrid):
-        state = list(self.getPlayerCoords(newGrid)) 
+        state = []
+        state.append(self.boxPosPlayer(newGrid))
         state += self.computeDistPlayerBox(newGrid)
         state += self.computeDistBoxGoal(newGrid)
         return state
@@ -295,7 +309,6 @@ class Sokoban():
 
     def futurePossibleStates(self):
         actions = self.computeActions()
-        start_state = self.computeStateDist(self.grid)
         states = []
         for action in actions:
             states.append(self.computeStateDist(self.calculateGrid(action)))
@@ -347,16 +360,9 @@ class Sokoban():
 
     def getReward(self, newGrid):
         reward = -1
-        # init_goals = len(self.current_level['goals'])
-        # levelComplete = 0
-        # left_goals = 0
-        # for row in newGrid:
-        #     if (2 in row) or (4 in row):
-        #         left_goals += 1
-        
-            # reward += (init_goals - left_goals)*10
         reward += self.boxMovedSimple(newGrid)
         return reward
+
 
 def main():
     run = True

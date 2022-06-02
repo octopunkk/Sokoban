@@ -47,6 +47,7 @@ class Agent:
         self.decay = decay
         self.metrics = metrics
         self.epsilon_min = epsilon_min
+
         # build the neural network
         self.model = Sequential()
         self.model.add(Dense(64, activation="relu", input_shape=(input_size,)))
@@ -116,8 +117,7 @@ class Agent:
         :param reward:reward received
         :param done:boolean value to signify whether the end of an episode is reached
         """
-        if self.memory.count((previous_state, next_state, reward, done)) == 0:
-            self.memory.append((previous_state, next_state, reward, done))
+        self.memory.append((previous_state, next_state, reward, done))
 
     def save(self, path: str):
         """
@@ -141,11 +141,14 @@ class Agent:
         """
         if len(self.memory) < batch_size:
             return
-        list_reward = [x[-2] for x in self.memory]
+
         # Randomly select a batch of experiences
-        experiences = random.sample(self.memory, batch_size)
-        # for i in sorted(list_reward, reverse=True)[:1]:
-        #     experiences.append(self.memory[list_reward.index(i)])
+        experiences = random.sample(self.memory, batch_size-20)
+
+        # Add best moves to the sample
+        list_reward = [x[-2] for x in self.memory]
+        for i in sorted(list_reward, reverse=True)[:20]:
+            experiences.append(self.memory[list_reward.index(i)])
 
         # compute the target for the neural network
         next_states = [experience[1] for experience in experiences]
@@ -166,6 +169,7 @@ class Agent:
         self.epsilon = max(
             self.epsilon * self.decay, self.epsilon_min
         )  # explore less
+
 
 if __name__ == "__main__":
     dqn = Agent()
